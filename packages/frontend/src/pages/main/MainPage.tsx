@@ -116,7 +116,7 @@ export function MainPage() {
                       `,
                     }}
                   >
-                    {idx === currentPos[options.level] ? (
+                    {idx === currentPos[options.level] && options.level < LEVELS - 1 ? (
                       renderGrid({
                         width: blockSize,
                         height: blockSize,
@@ -127,7 +127,7 @@ export function MainPage() {
                       <Block
                         key={idx}
                         blockSize={blockSize}
-                        isActive={options.level === LEVELS + 1}
+                        isActive={options.level === LEVELS - 1 && idx === currentPos[currentPos.length - 1]}
                         {...hsl}
                       />
                     )}
