@@ -12,4 +12,8 @@ export const router = createBrowserRouter([
     path: BASE_URL,
     element: <MainPage />,
   },
+  {
+    path: "*",
+    element: <Navigate to={BASE_URL} />,
+  },
 ]);
