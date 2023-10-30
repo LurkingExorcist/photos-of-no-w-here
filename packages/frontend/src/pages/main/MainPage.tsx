@@ -10,7 +10,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { hslGenerators } from "@/utils/hsl-generators";
 
 const SEED = Math.random();
-const LEVELS = 3;
+const LEVELS = 6;
 const INITIAL_LEVEL = 0;
 
 PerlinNoise.seed(SEED);
@@ -80,19 +80,19 @@ export function MainPage() {
       >
         {({ blockSize, boxes, count }) => {
           return boxes.map((currentBox, idx) => {
-            const hsl = hslGenerators.angleBased({
-              idx,
-              currentBox,
-              boxes,
-              count,
-              hue: options.hue,
-            });
-            // const hsl = hslGenerators.hueMapBased({
+            // const hsl = hslGenerators.angleBased({
             //   idx,
             //   currentBox,
+            //   boxes,
             //   count,
-            //   hue: options.hue ?? SEED * 360,
+            //   hue: options.hue,
             // });
+            const hsl = hslGenerators.hueMapBased({
+              idx,
+              currentBox,
+              count,
+              hue: options.hue ?? SEED * 360,
+            });
 
             return (
               <div className="main-page__cell" key={idx}>
@@ -124,7 +124,12 @@ export function MainPage() {
                         ...hsl,
                       })
                     ) : (
-                      <Block key={idx} blockSize={blockSize} {...hsl} />
+                      <Block
+                        key={idx}
+                        blockSize={blockSize}
+                        isActive={options.level === LEVELS + 1}
+                        {...hsl}
+                      />
                     )}
                   </motion.div>
                 </AnimatePresence>

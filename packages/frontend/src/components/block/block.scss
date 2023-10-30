@@ -5,7 +5,7 @@
 
   background-color: hsl(var(--block-hue), var(--block-saturation), var(--block-lightness));
 
-  &:hover {
+  &--active {
     --block-saturation: 75% !important;
     --block-lightness: 50% !important;
   }

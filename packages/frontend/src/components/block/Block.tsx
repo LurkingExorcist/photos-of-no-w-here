@@ -11,6 +11,7 @@ type Props = {
   hue?: number;
   saturation?: number;
   lightness?: number;
+  isActive?: boolean;
   onHover?: MouseEventHandler<HTMLDivElement>;
 } & PropsWithClassName;
 
@@ -20,11 +21,14 @@ export function Block({
   saturation,
   lightness,
   blockSize,
+  isActive,
   onHover,
 }: Props) {
   return (
     <div
-      className={clsx("block", className)}
+      className={clsx("block", {
+        'block--active': isActive,
+      }, className)}
       style={{
         "--block-hue": hue,
         "--block-saturation": !isNil(saturation)

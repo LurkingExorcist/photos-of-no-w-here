@@ -7,7 +7,7 @@ import {
 
 import "./grid.scss";
 import { as, splitBox } from "@/utils";
-import { Box, Count, Position, With } from "@/types";
+import { Count, SpaceBox } from "@/types";
 
 type Props = {
   width: number;
