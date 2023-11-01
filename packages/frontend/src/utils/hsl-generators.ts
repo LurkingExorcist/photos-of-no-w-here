@@ -48,17 +48,34 @@ export const hslGenerators = {
       ),
     };
   },
-  hueMapBased: ({idx, currentBox, count, hue}: {
+  hueMapBased: ({idx, currentBox, count, hue, zValue}: {
     idx: number;
     currentBox: SpaceBox;
     count: Count;
     hue: number;
+    zValue: number;
   }) => {
     const map = generateHueMap({count, initialValue: hue}).flat();
 
     return {
       hue: map[idx],
-      saturation: 40,
+      saturation: thru(
+        splitBox({
+          box: currentBox,
+          blockSize: currentBox.height / 2,
+        }),
+        ({ boxes, count }) =>
+          boxes.reduce(
+            (acc, subBox) =>
+              acc +
+              PerlinNoise.simplex3(subBox.x, subBox.y, zValue, {
+                scale: 0.001,
+                offset: 1000,
+              }) /
+                count.total,
+            0
+          ) * 100
+      ),
       lightness: thru(
         splitBox({
           box: currentBox,
@@ -68,7 +85,7 @@ export const hslGenerators = {
           boxes.reduce(
             (acc, subBox) =>
               acc +
-              PerlinNoise.simplex2(subBox.x, subBox.y, {
+              PerlinNoise.simplex3(subBox.x, subBox.y, zValue, {
                 scale: 0.0005,
                 offset: 0,
               }) /

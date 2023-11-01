@@ -159,7 +159,19 @@ export class PerlinNoise {
   }
 
   // 3D simplex noise
-  static simplex3(xin: number, yin: number, zin: number) {
+  static simplex3(
+    x: number,
+    y: number,
+    z: number,
+    options: {
+      scale: number;
+      offset: number;
+    } = { scale: 1, offset: 0 }
+  ) {
+    const xin = x * options.scale + options.offset;
+    const yin = y * options.scale + options.offset;
+    const zin = z * options.scale + options.offset;
+
     let n0, n1, n2, n3; // Noise contributions from the four corners
 
     // Skew the input space to determine which simplex cell we're in
@@ -279,8 +291,8 @@ export class PerlinNoise {
       n3 = t3 * t3 * gi3.dot3(x3, y3, z3);
     }
     // Add contributions from each corner to get the final noise value.
-    // The result is scaled to return values in the interval [-1,1].
-    return 32 * (n0 + n1 + n2 + n3);
+    // The result is scaled to return values in the interval [0,1].
+    return (32 * (n0 + n1 + n2 + n3)) / 2 + 0.5;
   }
 
   // 2D Perlin Noise

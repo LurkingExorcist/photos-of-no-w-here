@@ -4,7 +4,9 @@
   "workspaces": [
     "packages/*"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "fast-hash-code": "^2.1.0"
+  },
   "devDependencies": {
     "lerna": "^7.4.1"
   }

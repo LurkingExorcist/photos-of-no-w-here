@@ -3,6 +3,7 @@ import {
   useMemo,
   useState,
   type MouseEvent as ReactMouseEvent,
+  useEffect,
 } from "react";
 
 import "./grid.scss";
@@ -17,10 +18,11 @@ type Props = {
     count: Count;
     boxes: Array<SpaceBox>;
   }) => ReactNode[];
+  callbackRef?: (el: HTMLDivElement | null) => void;
   onMouseMove?: (e: ReactMouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 
-export function Grid({ width, height, children, onMouseMove }: Props) {
+export function Grid({ width, height, callbackRef, children, onMouseMove }: Props) {
   const [gridEl, setGridEl] = useState<HTMLDivElement | null>(null);
 
   const blockSize = useMemo(() => height / 2, [height]);
@@ -44,6 +46,10 @@ export function Grid({ width, height, children, onMouseMove }: Props) {
       blockSize,
     });
   }, [blockSize, width, height, gridEl]);
+
+  useEffect(() => {
+    callbackRef?.(gridEl);
+  }, [callbackRef, gridEl])
 
   return (
     <div

@@ -1,105 +1,102 @@
 import { Block, Grid } from "@/components";
 import { useWindowBox } from "@/hooks";
-import { useCallback, useState, MouseEvent } from "react";
+import { useCallback, useState, useEffect } from "react";
 import "./main-page.scss";
 import { range } from "lodash";
 import { PerlinNoise } from "@/lib";
-import { Box, HSL, SpaceBox } from "@/types";
-import { as, isOverSection, splitBox } from "@/utils";
+import { Box, HSL } from "@/types";
+import { as } from "@/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { hslGenerators } from "@/utils/hsl-generators";
+import clsx from "clsx";
 
 const SEED = Math.random();
-const LEVELS = 6;
+const LEVELS = 3;
 const INITIAL_LEVEL = 0;
 
 PerlinNoise.seed(SEED);
 
 export function MainPage() {
   const { windowHeight, windowWidth } = useWindowBox();
-  const [currentPos, setCurrentPos] = useState(range(LEVELS).fill(0));
+  const [deepPosition] = useState(range(LEVELS).fill(0));
+  const [counter, setCounter] = useState(0);
+  const [hashMap] = useState<Record<string, number>>({});
 
-  const onBlockHover = useCallback(
-    (e: MouseEvent<HTMLDivElement>) => {
-      const { left, top, width, height } =
-        e.currentTarget.getBoundingClientRect();
-      const { clientX, clientY } = e;
+  // const onBlockHover = useCallback(
+  //   (e: MouseEvent<HTMLDivElement>) => {
+  //     const { left, top, width, height } =
+  //       e.currentTarget.getBoundingClientRect();
+  //     const { clientX, clientY } = e;
 
-      const { pos } = range(LEVELS).reduce<{
-        pos: number[];
-        box: SpaceBox;
-      }>(
-        ({ box, pos }) => {
-          const { boxes } = splitBox({ box, blockSize: box.height / 2 });
+  //     setDeepPosition(
+  //       getDeepGridPosition({
+  //         levels: LEVELS,
+  //         box: { x: left, y: top, width, height },
+  //         initialValue: deepPosition,
+  //         position: { x: clientX, y: clientY },
+  //       })
+  //     );
+  //   },
+  //   [deepPosition]
+  // );
 
-          const matchedIndex = boxes.findIndex((subBox) =>
-            isOverSection({ x: clientX, y: clientY }, subBox)
-          );
+  // useEffect(() => {
+  //   const pos = range(LEVELS)
+  //     .map((idx) => {
+  //       const newIdx = Math.floor(counter / Math.pow(4, idx)) % 4;
 
-          if (matchedIndex !== -1) {
-            return {
-              pos: [...pos, matchedIndex],
-              box: boxes[matchedIndex],
-            };
-          }
+  //       return newIdx;
+  //     })
+  //     .reverse();
+  //   setDeepPosition(pos);
+  // }, [counter]);
 
-          return {
-            pos,
-            box,
-          };
-        },
-        {
-          pos: [],
-          box: {
-            x: left,
-            y: top,
-            width,
-            height,
-          },
-        }
-      );
+  useEffect(() => {
+    setInterval(() => {
+      setCounter((val) => val + 1);
+    }, 1000);
+  }, []);
 
-      if (!pos.length) {
-        pos.push(...currentPos);
-      } else {
-        const lengthDiff = LEVELS - pos.length;
-        pos.push(...Array.from({ length: lengthDiff }, () => 0));
-      }
+  // const onImageChange = useCallback(
+  //   (options: { currentDeepPosition: number[]; level: number }) =>
+  //     (hash: number) => {
+  //       if (options.level < LEVELS) return;
 
-      setCurrentPos(pos);
-    },
-    [currentPos]
-  );
+  //       setHashMap((hm) => ({
+  //         ...hm,
+  //         [options.currentDeepPosition.join("")]: hash,
+  //       }));
+  //     },
+  //   []
+  // );
 
   const renderGrid = useCallback(
-    (options: { level: number } & Box & Partial<HSL>) => (
-      <Grid
-        width={options.width}
-        height={options.height}
-        onMouseMove={options.level === INITIAL_LEVEL ? onBlockHover : undefined}
-      >
+    (
+      options: { level: number; currentDeepPosition: number[] } & Box &
+        Partial<HSL>
+    ) => (
+      <Grid width={options.width} height={options.height}>
         {({ blockSize, boxes, count }) => {
           return boxes.map((currentBox, idx) => {
-            // const hsl = hslGenerators.angleBased({
-            //   idx,
-            //   currentBox,
-            //   boxes,
-            //   count,
-            //   hue: options.hue,
-            // });
             const hsl = hslGenerators.hueMapBased({
               idx,
               currentBox,
               count,
               hue: options.hue ?? SEED * 360,
+              zValue: counter * 10,
             });
+
+            const isShowGrid = options.level < LEVELS - 1;
 
             return (
               <div className="main-page__cell" key={idx}>
                 <AnimatePresence>
                   <motion.div
                     className="main-page__motion"
-                    key={idx === currentPos[options.level] ? "grid" : "block"}
+                    key={clsx(
+                      isShowGrid ? "grid" : "block",
+                      hashMap[options.currentDeepPosition.join("")]
+                    )}
                     initial={{
                       opacity: 0,
                       transform: "rotate3d(1, 0, 0, 90deg)",
@@ -116,8 +113,12 @@ export function MainPage() {
                       `,
                     }}
                   >
-                    {idx === currentPos[options.level] && options.level < LEVELS - 1 ? (
+                    {isShowGrid ? (
                       renderGrid({
+                        currentDeepPosition: [
+                          ...options.currentDeepPosition,
+                          idx,
+                        ],
                         width: blockSize,
                         height: blockSize,
                         level: options.level + 1,
@@ -127,7 +128,14 @@ export function MainPage() {
                       <Block
                         key={idx}
                         blockSize={blockSize}
-                        isActive={options.level === LEVELS - 1 && idx === currentPos[currentPos.length - 1]}
+                        isActive={
+                          options.level === LEVELS - 1 &&
+                          idx === deepPosition[deepPosition.length - 1]
+                        }
+                        // onImageChange={onImageChange({
+                        //   currentDeepPosition: options.currentDeepPosition,
+                        //   level: options.level
+                        // })}
                         {...hsl}
                       />
                     )}
@@ -139,7 +147,7 @@ export function MainPage() {
         }}
       </Grid>
     ),
-    [currentPos, onBlockHover]
+    [deepPosition, counter, hashMap]
   );
 
   return (
@@ -148,6 +156,7 @@ export function MainPage() {
         width: windowWidth,
         height: windowHeight,
         level: INITIAL_LEVEL,
+        currentDeepPosition: [],
       })}
     </div>
   );
