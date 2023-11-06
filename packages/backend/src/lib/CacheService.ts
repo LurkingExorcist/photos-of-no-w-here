@@ -17,7 +17,7 @@ export class CacheService {
   public set<V>(key: string, value: V) {
     this.cache[key] = value;
 
-    fs.writeFileSync(cachePath, JSON.stringify(this.cache));
+    fs.writeFileSync(cachePath, JSON.stringify(this.cache, null, 2));
   }
 
   private getCache() {

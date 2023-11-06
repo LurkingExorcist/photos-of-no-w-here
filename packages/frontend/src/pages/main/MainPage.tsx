@@ -1,44 +1,44 @@
 import { Block, Grid } from "@/components";
 import { useWindowBox } from "@/hooks";
-import { useCallback, useState, useEffect } from "react";
+import { MouseEvent, useCallback, useState } from "react";
 import "./main-page.scss";
 import { range } from "lodash";
 import { PerlinNoise } from "@/lib";
 import { Box, HSL } from "@/types";
-import { as } from "@/utils";
+import { as, getDeepGridPosition } from "@/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { hslGenerators } from "@/utils/hsl-generators";
 import clsx from "clsx";
 
 const SEED = Math.random();
-const LEVELS = 3;
+const LEVELS = 4;
 const INITIAL_LEVEL = 0;
 
 PerlinNoise.seed(SEED);
 
 export function MainPage() {
   const { windowHeight, windowWidth } = useWindowBox();
-  const [deepPosition] = useState(range(LEVELS).fill(0));
-  const [counter, setCounter] = useState(0);
+  const [deepPosition, setDeepPosition] = useState(range(LEVELS).fill(0));
+  // const [counter, setCounter] = useState(0);
   const [hashMap] = useState<Record<string, number>>({});
 
-  // const onBlockHover = useCallback(
-  //   (e: MouseEvent<HTMLDivElement>) => {
-  //     const { left, top, width, height } =
-  //       e.currentTarget.getBoundingClientRect();
-  //     const { clientX, clientY } = e;
+  const onBlockHover = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      const { left, top, width, height } =
+        e.currentTarget.getBoundingClientRect();
+      const { clientX, clientY } = e;
 
-  //     setDeepPosition(
-  //       getDeepGridPosition({
-  //         levels: LEVELS,
-  //         box: { x: left, y: top, width, height },
-  //         initialValue: deepPosition,
-  //         position: { x: clientX, y: clientY },
-  //       })
-  //     );
-  //   },
-  //   [deepPosition]
-  // );
+      setDeepPosition(
+        getDeepGridPosition({
+          levels: LEVELS,
+          box: { x: left, y: top, width, height },
+          initialValue: deepPosition,
+          position: { x: clientX, y: clientY },
+        })
+      );
+    },
+    [deepPosition]
+  );
 
   // useEffect(() => {
   //   const pos = range(LEVELS)
@@ -51,11 +51,11 @@ export function MainPage() {
   //   setDeepPosition(pos);
   // }, [counter]);
 
-  useEffect(() => {
-    setInterval(() => {
-      setCounter((val) => val + 1);
-    }, 1000);
-  }, []);
+  // useEffect(() => {
+  //   setInterval(() => {
+  //     setCounter((val) => val + 1);
+  //   }, 1000);
+  // }, []);
 
   // const onImageChange = useCallback(
   //   (options: { currentDeepPosition: number[]; level: number }) =>
@@ -75,7 +75,11 @@ export function MainPage() {
       options: { level: number; currentDeepPosition: number[] } & Box &
         Partial<HSL>
     ) => (
-      <Grid width={options.width} height={options.height}>
+      <Grid
+        width={options.width}
+        height={options.height}
+        onMouseMove={options.level === INITIAL_LEVEL ? onBlockHover : undefined}
+      >
         {({ blockSize, boxes, count }) => {
           return boxes.map((currentBox, idx) => {
             const hsl = hslGenerators.hueMapBased({
@@ -83,10 +87,11 @@ export function MainPage() {
               currentBox,
               count,
               hue: options.hue ?? SEED * 360,
-              zValue: counter * 10,
+              zValue: 0,
             });
 
-            const isShowGrid = options.level < LEVELS - 1;
+            const isShowGrid =
+              idx === deepPosition[options.level] && options.level < LEVELS - 1;
 
             return (
               <div className="main-page__cell" key={idx}>
@@ -147,7 +152,7 @@ export function MainPage() {
         }}
       </Grid>
     ),
-    [deepPosition, counter, hashMap]
+    [deepPosition, hashMap, onBlockHover]
   );
 
   return (

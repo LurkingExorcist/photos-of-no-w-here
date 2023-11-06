@@ -70,7 +70,7 @@ export const hslGenerators = {
               acc +
               PerlinNoise.simplex3(subBox.x, subBox.y, zValue, {
                 scale: 0.001,
-                offset: 1000,
+                offset: 100,
               }) /
                 count.total,
             0
@@ -86,7 +86,7 @@ export const hslGenerators = {
             (acc, subBox) =>
               acc +
               PerlinNoise.simplex3(subBox.x, subBox.y, zValue, {
-                scale: 0.0005,
+                scale: 0.001,
                 offset: 0,
               }) /
                 count.total,
