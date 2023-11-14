@@ -9,7 +9,7 @@ export default defineConfig({
     port: 3030,
   },
   preview: {
-    port: 8080,
+    port: 80,
   },
   resolve: {
     alias: {
