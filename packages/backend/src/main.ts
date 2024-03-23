@@ -1,18 +1,9 @@
-import "dotenv/config";
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './domain/app/app.module';
+import { BACKEND_PORT } from '@photos-of-no-w-here/config';
 
-import express from "express";
-import cors from "cors";
-
-import { router } from "./router";
-
-const app = express();
-
-app.use(cors());
-
-app.use(router);
-
-app.listen(process.env.PORT, () =>
-  console.info(
-    `rocks are quiet because trees are listening on port ${process.env.PORT}`
-  )
-);
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(BACKEND_PORT);
+}
+bootstrap();

@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react-swc'
 export default defineConfig({
   base: '/photos-of-no-w-here/',
   server: {
-    port: 3030,
+    port: 3333,
   },
   preview: {
     port: 80,

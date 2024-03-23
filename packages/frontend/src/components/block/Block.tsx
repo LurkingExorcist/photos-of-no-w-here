@@ -12,6 +12,7 @@ import "./block.scss";
 import clsx from "clsx";
 import { isNil } from "lodash";
 import fastHashCode from "fast-hash-code";
+import { BACKEND_PORT } from "@photos-of-no-w-here/config";
 
 type Props = {
   blockSize: number;
@@ -79,7 +80,7 @@ function RawBlock({
         width: as.px(blockSize),
         height: as.px(blockSize),
       }}
-      src={`http://localhost:3000/image/${HSLToRGB({
+      src={`http://localhost:${BACKEND_PORT}/image/${HSLToRGB({
         hue,
         saturation,
         lightness,

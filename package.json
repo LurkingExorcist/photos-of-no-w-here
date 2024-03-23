@@ -8,6 +8,7 @@
     "fast-hash-code": "^2.1.0"
   },
   "devDependencies": {
+    "@types/multer": "^1.4.11",
     "lerna": "^7.4.1"
   }
 }
