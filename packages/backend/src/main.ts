@@ -1,7 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './domain/app/app.module';
-import { BACKEND_PORT } from '@photos-of-no-w-here/config';
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
@@ -15,6 +14,6 @@ async function bootstrap() {
     const documentFactory = () => SwaggerModule.createDocument(app, config);
     SwaggerModule.setup('api', app, documentFactory);
 
-    await app.listen(BACKEND_PORT);
+    await app.listen(3333);
 }
 bootstrap();
