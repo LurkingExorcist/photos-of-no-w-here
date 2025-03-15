@@ -1,136 +1,168 @@
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import afs from 'fs/promises';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { IReadableFile } from 'src/types/common';
 import { Media, Post } from './data.interface';
 import sharp from 'sharp';
 import { getAverageColor } from 'fast-average-color-node';
 import decompress from 'decompress';
+import { sortBy } from 'lodash';
+import { WorkerData } from './data.worker';
+import { Worker } from 'worker_threads';
 
-const UPLOAD_PATH = path.resolve('temp'); // Register the upload path
+const TEMP_UPLOAD_PATH = path.resolve('temp'); // Register the upload path
 
-if (!fs.existsSync(UPLOAD_PATH)) {
-  fs.mkdirSync(UPLOAD_PATH);
+if (!fs.existsSync(TEMP_UPLOAD_PATH)) {
+    fs.mkdirSync(TEMP_UPLOAD_PATH);
 }
 
-const DATA_PATH = path.resolve('data'); // Register the data path
+const INSTAGRAM_DATA_PATH = path.resolve('instagram_data'); // Register the data path
 
-if (!fs.existsSync(DATA_PATH)) {
-  fs.mkdirSync(DATA_PATH);
+const POSTS_CONFIG_PATH = path.resolve(
+    INSTAGRAM_DATA_PATH + '/your_instagram_activity/content/posts_1.json'
+);
+
+if (!fs.existsSync(INSTAGRAM_DATA_PATH)) {
+    fs.mkdirSync(INSTAGRAM_DATA_PATH);
 }
 
 @Injectable()
 export class DataService {
-  private async processArchive({ filename, stream }: IReadableFile) {
-    return new Promise<void>((resolve, reject) => {
-      if (!filename.endsWith('.zip')) {
-        return reject(new Error('Zip file is required.'));
-      }
+    constructor(private readonly logger: Logger) {}
 
-      const filePath = path.join(UPLOAD_PATH, filename);
+    private async processArchive({ originalname, buffer }: IReadableFile) {
+        if (!originalname.endsWith('.zip')) {
+            return new Error('Zip file is required.');
+        }
 
-      console.log(`Upload of '${filename}' started`);
+        this.logger.log(`Upload of '${originalname}' started`);
 
-      const fstream = fs.createWriteStream(filePath);
-      stream.pipe(fstream);
+        const filePath = path.join(TEMP_UPLOAD_PATH, originalname);
+        await afs.writeFile(filePath, buffer);
 
-      fstream.on('close', async () => {
-        console.log(`Decompressing of '${filename}' started...`);
+        this.logger.log(`Decompressing of '${originalname}' started...`);
 
-        await decompress(filePath, DATA_PATH);
+        await decompress(filePath, INSTAGRAM_DATA_PATH);
 
-        console.log(`Decompressing of '${filename}' finished`);
-
-        console.log(`Deleting of '${filename}' started...`);
+        this.logger.log(`Decompressing of '${originalname}' finished`);
+        this.logger.log(`Deleting of '${originalname}' started...`);
 
         fs.rmSync(filePath);
 
-        console.log(`Deleting of '${filename}' finished`);
-
-        resolve();
-      });
-    });
-  }
-
-  private async getPosts(): Promise<Post[]> {
-    const postsPath = path.resolve(
-      'data/your_instagram_activity/content/posts_1.json',
-    );
-
-    console.log('Getting posts...');
-
-    return afs
-      .readFile(postsPath, { encoding: 'utf8' })
-      .then((module) => JSON.parse(module));
-  }
-
-  async upload(archive: IReadableFile) {
-    await this.processArchive(archive);
-
-    const posts = await this.getPosts();
-
-    const medias: Media[] = [];
-
-    posts.forEach(({ media: [media] }) => {});
-
-    for (let i = 0; i < posts.length; i++) {
-      const {
-        media: [media],
-      } = posts[i];
-
-      let postPath = path.resolve(DATA_PATH, media.uri);
-      const match = postPath.match(/(.+)\/(.+)\.(\w+)$/);
-
-      if (!match) {
-        throw new Error(`Path ${postPath} doesn't fit to match pattern`);
-      }
-
-      const [_full, location, name, ext] = match;
-
-      if (ext === 'mp4') {
-        continue;
-      }
-
-      media.uri = `${location}/${name}.webp`;
-      console.log(`Processing file: ${media.uri}...`);
-
-      switch (ext) {
-        case 'jpg':
-        case 'jpeg':
-        case 'heic':
-          await sharp(postPath).jpeg().toFile(media.uri);
-
-          console.log(`Extension is changed for: ${media.uri}`);
-
-          postPath = path.resolve(DATA_PATH, media.uri);
-          break;
-      }
-
-      const color = await getAverageColor(postPath);
-      media.average_color = color.hex;
-
-      medias.push(media);
+        this.logger.log(`Deleting of '${originalname}' finished`);
     }
 
-    console.log('Starting caching...');
+    private async getPosts(): Promise<Post[]> {
+        this.logger.log('Getting posts...');
 
-    console.log('Caching is complete');
+        return afs
+            .readFile(POSTS_CONFIG_PATH, { encoding: 'utf8' })
+            .then((module) => JSON.parse(module));
+    }
 
-    console.log('Overriding old posts data...');
+    async processMediaToColors(workerData: WorkerData) {
+        return new Promise<void>((resolve, reject) => {
+            const worker = new Worker('./src/domain/data/data.worker.js', {
+                workerData,
+            });
 
-    await afs.writeFile(postsPath, JSON.stringify(posts));
+            worker.on('message', (message) => {
+                this.logger.log(message);
+            });
 
-    console.log('Overriding complete');
+            worker.on('close', () => {
+                resolve();
+            });
 
-    console.log('Updating the cache...');
+            worker.on('error', (msg) => {
+                reject(`An error ocurred: ${msg}`);
+            });
+        });
+    }
 
-    cache.update();
+    async upload(archive: IReadableFile) {
+        await this.processArchive(archive);
 
-    console.log('Cache is updated');
+        const posts = await this.getPosts();
 
-    res.json({
-      success: true,
-    });
-  }
+        const medias: Media[] = [];
+
+        for (let i = 0; i < posts.length; i++) {
+            const {
+                media: [media],
+            } = posts[i];
+
+            let postPath = path.resolve(INSTAGRAM_DATA_PATH, media.uri);
+            const match = postPath.match(/(.+)\/(.+)\.(\w+)$/);
+
+            if (!match) {
+                throw new Error(
+                    `Path ${postPath} doesn't fit to match pattern`
+                );
+            }
+
+            const [_full, location, name, ext] = match;
+
+            if (ext === 'mp4') {
+                continue;
+            }
+
+            media.uri = `${location}/${name}.webp`;
+            this.logger.log(`Processing file: ${media.uri}...`);
+
+            switch (ext) {
+                case 'jpg':
+                case 'jpeg':
+                case 'heic':
+                    await sharp(postPath).webp().toFile(media.uri);
+
+                    this.logger.log(`Extension is changed for: ${media.uri}`);
+
+                    postPath = path.resolve(INSTAGRAM_DATA_PATH, media.uri);
+                    break;
+            }
+
+            const color = await getAverageColor(postPath);
+            media.average_color = color.hex;
+            media.average_color_raw = color.value;
+
+            posts[i].media[0] = media;
+            medias.push(media);
+        }
+
+        this.logger.log('Overriding old posts data...');
+
+        await afs.writeFile(POSTS_CONFIG_PATH, JSON.stringify(posts));
+
+        this.logger.log('Overriding complete');
+
+        await this.verifyCache(medias);
+    }
+
+    async verifyCache(inputMedias?: Media[]) {
+        const medias = sortBy(
+            inputMedias ??
+                (await this.getPosts().then((posts) =>
+                    posts.map((post) => post.media[0])
+                )),
+            (media) => media.average_color
+        );
+
+        this.logger.log('Updating cache...');
+
+        const threadCount = os.cpus().length;
+        await Promise.all(
+            Array.from({ length: threadCount }, (_, workerIndex) =>
+                this.processMediaToColors({
+                    medias,
+                    threadCount,
+                    workerIndex,
+                })
+            )
+        );
+
+        this.logger.log('Cache is successfully updated');
+    }
 }

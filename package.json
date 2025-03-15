@@ -4,11 +4,9 @@
   "workspaces": [
     "packages/*"
   ],
-  "dependencies": {
-    "fast-hash-code": "^2.1.0"
-  },
-  "devDependencies": {
-    "@types/multer": "^1.4.11",
-    "lerna": "^7.4.1"
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "start": "npm run start --workspaces --if-present",
+    "dev": "npm run dev --workspaces --if-present"
   }
 }

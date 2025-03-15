@@ -1,44 +1,51 @@
 export interface Post {
-  media: Media[];
+    media: Media[];
 }
 
 export interface Media {
-  uri: string;
-  creation_timestamp: number;
-  media_metadata?: MediaMetadata;
-  title: string;
-  cross_post_source: CrossPostSource;
-  average_color?: string;
+    uri: string;
+    creation_timestamp: number;
+    media_metadata?: MediaMetadata;
+    title: string;
+    cross_post_source: CrossPostSource;
+    average_color?: string;
+    average_color_raw?: [number, number, number, number];
 }
 
 export interface CrossPostSource {
-  source_app: string;
+    source_app: string;
 }
 
 export interface MediaMetadata {
-  photo_metadata?: PhotoMetadata;
-  video_metadata?: VideoMetadata;
+    photo_metadata?: PhotoMetadata;
+    video_metadata?: VideoMetadata;
 }
 
 export interface PhotoMetadata {
-  exif_data: PhotoMetadataExifDatum[];
+    exif_data: PhotoMetadataExifDatum[];
 }
 
 export interface PhotoMetadataExifDatum {
-  scene_capture_type?: string;
-  software?: string;
-  device_id: string;
-  date_time_digitized?: string;
-  date_time_original?: string;
-  source_type: string;
+    scene_capture_type?: string;
+    software?: string;
+    device_id: string;
+    date_time_digitized?: string;
+    date_time_original?: string;
+    source_type: string;
 }
 
 export interface VideoMetadata {
-  exif_data: VideoMetadataExifDatum[];
+    exif_data: VideoMetadataExifDatum[];
 }
 
 export interface VideoMetadataExifDatum {
-  device_id: string;
-  date_time_original: string;
-  source_type: string;
+    device_id: string;
+    date_time_original: string;
+    source_type: string;
+}
+
+export interface WorkerData {
+    medias: Media[];
+    threadCount: number;
+    workerIndex: number;
 }

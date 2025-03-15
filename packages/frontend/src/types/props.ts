@@ -1,3 +1,3 @@
 export type PropsWithClassName = {
-  className?: string;
+    className?: string;
 };

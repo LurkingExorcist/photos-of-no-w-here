@@ -1,6 +1,8 @@
-import { Readable } from 'stream';
-
 export interface IReadableFile {
-  filename: string;
-  stream: Readable;
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    buffer: Buffer;
+    size: number;
 }

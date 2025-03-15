@@ -1,2 +1,2 @@
-export * from "./utility";
-export * from "./props";
+export * from './utility';
+export * from './props';

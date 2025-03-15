@@ -1,1 +1,1 @@
-export * from "./PerlinNoise";
+export * from './PerlinNoise';

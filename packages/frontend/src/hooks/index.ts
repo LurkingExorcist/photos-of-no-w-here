@@ -1,1 +1,1 @@
-export * from "./useWindowBox";
+export * from './useWindowBox';
