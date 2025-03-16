@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CacheType } from './types';
+import { CacheType } from '@/external/redis/types';
 import { prefix, prefixColor, prefixMedia, unprefix } from './prefixer.utils';
 
 /**

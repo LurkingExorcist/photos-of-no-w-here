@@ -1,8 +1,8 @@
 import { Controller, Get, NotFoundException, Param, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { RedisService } from '@/external/redis/redis.service';
-import { PrefixerService } from '@/external/redis/prefixer.service';
 import { ApiParam, ApiOperation } from '@nestjs/swagger';
+import { PrefixerService } from '../cache/prefixer.service';
 
 /**
  * Controller responsible for handling photo-related operations

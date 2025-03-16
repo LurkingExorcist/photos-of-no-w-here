@@ -1,7 +1,7 @@
 // @ts-check
 const { workerData, parentPort } = require('worker_threads');
 const { Redis } = require('ioredis');
-const { prefixColor } = require('../../external/redis/prefixer.utils');
+const { prefixColor } = require('../cache/prefixer.utils');
 
 if (!parentPort) {
     throw new Error('parentPort is null');
