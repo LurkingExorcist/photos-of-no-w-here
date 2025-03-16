@@ -1,7 +1,7 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./packages/frontend/tsconfig.frontend.json" },
-    { "path": "./packages/backend/tsconfig.backend.json" },
-  ]
+    "files": [],
+    "references": [
+        { "path": "./packages/frontend/tsconfig.json" },
+        { "path": "./packages/backend/tsconfig.json" }
+    ]
 }
