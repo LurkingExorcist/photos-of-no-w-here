@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
-import { CacheService } from './cache.service';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+
 import { CacheType, CacheTypeAll } from '@/external/redis/types';
+
 import { Media } from '../data/types';
-import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
+
+import { CacheService } from './cache.service';
+
 /**
  * Controller for managing the cache operations
  */
@@ -17,7 +21,7 @@ export class CacheController {
      */
     @ApiOperation({ summary: 'Get current cache statistics' })
     @Get('stats')
-    async getCacheStats() {
+    public async getCacheStats() {
         return this.cacheService.getCacheStats();
     }
 
@@ -30,7 +34,7 @@ export class CacheController {
         summary: 'Verify and update the cache for the given media items',
     })
     @Post('verify')
-    async verifyCache(@Body() { medias }: { medias: Media[] }) {
+    public async verifyCache(@Body() { medias }: { medias: Media[] }) {
         return this.cacheService.verifyCache(medias);
     }
 
@@ -48,7 +52,7 @@ export class CacheController {
         description: 'The type of cache to clear (optional)',
     })
     @Post('clear')
-    async clearCache(@Query('type') type?: CacheType | CacheTypeAll) {
+    public async clearCache(@Query('type') type?: CacheType | CacheTypeAll) {
         return this.cacheService.clearCache(type);
     }
 }

@@ -1,4 +1,4 @@
-import { Media } from '../data/types';
+import type { Media } from '../data/types';
 
 export interface MediaColorProcessorData {
     medias: Media[];

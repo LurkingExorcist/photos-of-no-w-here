@@ -4,6 +4,7 @@ import * as tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import eslintPluginPrettier from 'eslint-plugin-prettier';
+import eslintPluginImport from 'eslint-plugin-import';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import globals from 'globals';
@@ -44,6 +45,7 @@ const commonTypeScriptConfig = {
     files: ['**/*.ts', '**/*.tsx'],
     plugins: {
         '@typescript-eslint': tseslint.plugin,
+        import: eslintPluginImport,
     },
     languageOptions: {
         parser: tseslint.parser,
@@ -75,6 +77,60 @@ const commonTypeScriptConfig = {
         'no-console': ['warn', { allow: ['warn', 'error'] }],
         'no-undef': 'off', // Turn off base rule as TypeScript handles this better
         '@typescript-eslint/no-namespace': 'off', // Allow the use of namespaces
+        '@typescript-eslint/sort-type-constituents': 'error',
+        '@typescript-eslint/member-ordering': 'error',
+        'sort-imports': [
+            'error',
+            {
+                ignoreCase: false,
+                ignoreDeclarationSort: true, // We'll handle declaration sorting separately
+                ignoreMemberSort: false,
+                memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
+                allowSeparatedGroups: true,
+            },
+        ],
+        '@typescript-eslint/consistent-type-imports': [
+            'error',
+            {
+                prefer: 'type-imports',
+                disallowTypeAnnotations: true,
+            },
+        ],
+        'import/order': [
+            'error',
+            {
+                groups: [
+                    'builtin',
+                    'external',
+                    'parent',
+                    'sibling',
+                    'index',
+                    'object',
+                    'type',
+                ],
+                pathGroups: [
+                    {
+                        pattern: '@/**',
+                        group: 'external',
+                        position: 'after',
+                    },
+                ],
+                'newlines-between': 'always',
+                alphabetize: {
+                    order: 'asc',
+                    caseInsensitive: true,
+                },
+            },
+        ],
+        '@typescript-eslint/explicit-member-accessibility': [
+            'error',
+            {
+                accessibility: 'explicit',
+                overrides: {
+                    constructors: 'no-public',
+                },
+            },
+        ],
     },
 };
 
@@ -183,6 +239,11 @@ export default [
 
     // Global ignores
     {
-        ignores: ['**/dist/**', '**/node_modules/**', '**/.git/**'],
+        ignores: [
+            '**/dist/**',
+            '**/node_modules/**',
+            '**/.git/**',
+            'packages/frontend_old/**',
+        ],
     },
 ];

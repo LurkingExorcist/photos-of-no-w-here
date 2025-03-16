@@ -5,15 +5,15 @@ import { ConfigService as NestConfigService } from '@nestjs/config';
 export class ConfigService {
     constructor(private configService: NestConfigService) {}
 
-    get redisHost(): string {
+    public get redisHost(): string {
         return this.configService.get<string>('REDIS_HOST', 'localhost');
     }
 
-    get redisPort(): number {
+    public get redisPort(): number {
         return this.configService.get<number>('REDIS_PORT', 6379);
     }
 
-    get port(): number {
+    public get port(): number {
         return this.configService.get<number>('PORT', 3333);
     }
 }

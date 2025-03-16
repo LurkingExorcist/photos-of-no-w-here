@@ -4,9 +4,10 @@ import {
     UploadedFile,
     UseInterceptors,
 } from '@nestjs/common';
-import { DataService } from './data.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+
+import { DataService } from './data.service';
 
 /**
  * Controller responsible for managing data operations including file uploads and cache management
@@ -38,7 +39,7 @@ export class DataController {
         },
     })
     @UseInterceptors(FileInterceptor('archive'))
-    async uploadFile(@UploadedFile() archive: Express.Multer.File) {
+    public async uploadFile(@UploadedFile() archive: Express.Multer.File) {
         return this.dataService.upload(archive);
     }
 }

@@ -1,4 +1,4 @@
-import { RGBAColor, HSLColor } from '../media-color/media-color.types';
+import type { HSLColor, RGBAColor } from '../media-color/media-color.types';
 
 /**
  * Represents a social media post containing an array of media items

@@ -1,9 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Worker } from 'worker_threads';
 import { join } from 'path';
-import { ConfigService } from '@/config/config.service';
-import { Media } from '../data/types';
+import { Worker } from 'worker_threads';
+
+import { Injectable, Logger } from '@nestjs/common';
 import { getAverageColor } from 'fast-average-color-node';
+
+import { ConfigService } from '@/config/config.service';
+
+import { Media } from '../data/types';
+
 import { HSLColor, HexColor, RGBAColor } from './media-color.types';
 import { convertRgbToHsl } from './media-color.utils';
 
@@ -12,10 +16,6 @@ export class MediaColorService {
     private readonly logger = new Logger(MediaColorService.name);
 
     constructor(private readonly configService: ConfigService) {}
-
-    private convertRgbToHsl(...color: RGBAColor): HSLColor {
-        return convertRgbToHsl(...color);
-    }
 
     /**
      * Calculates and sets the average color for a media item
@@ -78,5 +78,9 @@ export class MediaColorService {
                 }
             });
         });
+    }
+
+    private convertRgbToHsl(...color: RGBAColor): HSLColor {
+        return convertRgbToHsl(...color);
     }
 }

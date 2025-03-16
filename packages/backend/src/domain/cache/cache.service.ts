@@ -1,11 +1,15 @@
+import os from 'os';
+
 import { Injectable, Logger } from '@nestjs/common';
+import { sortBy } from 'lodash';
+
 import { RedisService } from '@/external/redis/redis.service';
-import { PrefixerService } from './prefixer.service';
+import { CacheType, CacheTypeAll } from '@/external/redis/types';
+
 import { Media } from '../data/types';
 import { MediaColorService } from '../media-color/media-color.service';
-import { sortBy } from 'lodash';
-import os from 'os';
-import { CacheType, CacheTypeAll } from '@/external/redis/types';
+
+import { PrefixerService } from './prefixer.service';
 
 @Injectable()
 export class CacheService {
@@ -43,33 +47,10 @@ export class CacheService {
     }
 
     /**
-     * Count keys by pattern using SCAN for memory efficiency
-     * @param pattern Redis key pattern to match
-     * @returns Number of matching keys
-     */
-    private async countKeys(pattern: `${CacheType}:*`): Promise<number> {
-        let cursor = '0';
-        let count = 0;
-
-        do {
-            const [nextCursor, keys] = await this.redis.scan(
-                cursor,
-                pattern,
-                100
-            );
-
-            cursor = nextCursor;
-            count += keys.length;
-        } while (cursor !== '0');
-
-        return count;
-    }
-
-    /**
      * Get cache statistics using memory-efficient SCAN
      * @returns Object containing counts of different cache types
      */
-    async getCacheStats() {
+    public async getCacheStats() {
         const stats = {
             color: 0,
             media: 0,
@@ -93,7 +74,7 @@ export class CacheService {
      * @param type - Type of cache to clear
      * @returns Object containing information about the clearing operation
      */
-    async clearCache(type: CacheType | CacheTypeAll = 'all') {
+    public async clearCache(type: CacheType | CacheTypeAll = 'all') {
         this.logger.log(`Starting cache clearing for type: ${type}`);
 
         if (type === 'all') {
@@ -135,5 +116,28 @@ export class CacheService {
             entriesCleared: deletedCount,
             message: `Cache cleared successfully`,
         };
+    }
+
+    /**
+     * Count keys by pattern using SCAN for memory efficiency
+     * @param pattern Redis key pattern to match
+     * @returns Number of matching keys
+     */
+    private async countKeys(pattern: `${CacheType}:*`): Promise<number> {
+        let cursor = '0';
+        let count = 0;
+
+        do {
+            const [nextCursor, keys] = await this.redis.scan(
+                cursor,
+                pattern,
+                100
+            );
+
+            cursor = nextCursor;
+            count += keys.length;
+        } while (cursor !== '0');
+
+        return count;
     }
 }

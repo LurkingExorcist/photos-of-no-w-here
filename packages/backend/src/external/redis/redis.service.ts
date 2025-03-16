@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import Redis, { ChainableCommander } from 'ioredis';
+
 import { ConfigService } from '@/config/config.service';
 
 /**
@@ -22,7 +23,7 @@ export class RedisService {
      * @param key - The cache key
      * @param value - The value to store
      */
-    async set(key: string, value: string): Promise<void> {
+    public async set(key: string, value: string): Promise<void> {
         await this.client.set(key, value);
     }
 
@@ -31,7 +32,7 @@ export class RedisService {
      * @param key - The cache key
      * @returns The cached value or null if not found
      */
-    async get(key: string): Promise<string> {
+    public async get(key: string): Promise<string> {
         return await this.client.get(key);
     }
 
@@ -40,7 +41,7 @@ export class RedisService {
      * @param key - The cache key to check
      * @returns Boolean indicating if the key exists
      */
-    async has(key: string): Promise<boolean> {
+    public async has(key: string): Promise<boolean> {
         return (await this.client.exists(key)) > 0;
     }
 
@@ -48,14 +49,14 @@ export class RedisService {
      * Deletes a key from Redis cache
      * @param key - The cache key to delete
      */
-    async del(key: string): Promise<void> {
+    public async del(key: string): Promise<void> {
         await this.client.del(key);
     }
 
     /**
      * Flushes all data from the Redis database
      */
-    async flushdb(): Promise<void> {
+    public async flushdb(): Promise<void> {
         await this.client.flushdb();
     }
 
@@ -64,7 +65,7 @@ export class RedisService {
      * @param pattern - The pattern to match keys against
      * @returns Array of matching keys
      */
-    async keys(pattern: string): Promise<string[]> {
+    public async keys(pattern: string): Promise<string[]> {
         return await this.client.keys(pattern);
     }
 
@@ -72,7 +73,7 @@ export class RedisService {
      * Deletes all keys matching a pattern
      * @param pattern - The pattern to match keys against
      */
-    async delKeys(pattern: string): Promise<void> {
+    public async delKeys(pattern: string): Promise<void> {
         const keys = await this.keys(pattern);
         await this.client.del(...keys);
     }
@@ -84,7 +85,7 @@ export class RedisService {
      * @param count - Number of keys to return per iteration
      * @returns Tuple of next cursor and matching elements
      */
-    async scan(
+    public async scan(
         cursor: string,
         pattern: string,
         count: number
@@ -96,7 +97,7 @@ export class RedisService {
      * Executes multiple Redis commands in a pipeline
      * @param commands - Array of functions that add commands to the pipeline
      */
-    async pipeline(
+    public async pipeline(
         commands: ((pipeline: ChainableCommander) => Promise<unknown>)[]
     ): Promise<void> {
         const pipeline = this.client.pipeline();

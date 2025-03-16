@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+
 import { CacheType } from '@/external/redis/types';
+
 import { prefix, prefixColor, prefixMedia, unprefix } from './prefixer.utils';
 
 /**
@@ -14,7 +16,7 @@ export class PrefixerService {
      * @param value - The value to prefix
      * @returns Prefixed cache key
      */
-    prefix(type: CacheType, value: string) {
+    public prefix(type: CacheType, value: string) {
         return prefix(type, value);
     }
 
@@ -23,7 +25,7 @@ export class PrefixerService {
      * @param value - The color value to prefix
      * @returns Color-prefixed cache key
      */
-    color(value: string) {
+    public color(value: string) {
         return prefixColor(value);
     }
 
@@ -32,7 +34,7 @@ export class PrefixerService {
      * @param value - The media identifier to prefix
      * @returns Media-prefixed cache key
      */
-    media(value: string) {
+    public media(value: string) {
         return prefixMedia(value);
     }
 
@@ -41,7 +43,7 @@ export class PrefixerService {
      * @param key - The prefixed cache key
      * @returns Original value without prefix
      */
-    unprefix(key: string) {
+    public unprefix(key: string) {
         return unprefix(key);
     }
 }

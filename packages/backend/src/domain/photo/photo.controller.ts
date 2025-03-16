@@ -1,7 +1,9 @@
 import { Controller, Get, NotFoundException, Param, Res } from '@nestjs/common';
+import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Response } from 'express';
+
 import { RedisService } from '@/external/redis/redis.service';
-import { ApiParam, ApiOperation } from '@nestjs/swagger';
+
 import { PrefixerService } from '../cache/prefixer.service';
 
 /**
@@ -25,7 +27,7 @@ export class PhotoController {
     @Get('/:color')
     @ApiOperation({ summary: 'Get photo by color' })
     @ApiParam({ name: 'color', description: 'Hex color value (without #)' })
-    async getPhoto(
+    public async getPhoto(
         @Res() response: Response,
         @Param('color') colorHex: string
     ) {

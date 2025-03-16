@@ -1,4 +1,4 @@
-import { HSLColor, RGBAColor } from './media-color.types';
+import type { HSLColor, RGBAColor } from './media-color.types';
 
 /**
  * Calculates the lightness component of an HSL color

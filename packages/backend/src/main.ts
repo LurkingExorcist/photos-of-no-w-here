@@ -1,7 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
 import { ConfigService } from './config/config.service';
+
+import './essential/init-directories';
 
 /**
  * Bootstrap function to initialize and start the NestJS application
