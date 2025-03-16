@@ -1,6 +1,24 @@
 import type { HSLColor, RGBAColor } from '../media-color/media-color.types';
 
 /**
+ * Represents a readable file with its metadata
+ */
+export interface IReadableFile {
+    /** The name of the field in the form data */
+    fieldname: string;
+    /** The original name of the file */
+    originalname: string;
+    /** The encoding of the file */
+    encoding: string;
+    /** The MIME type of the file */
+    mimetype: string;
+    /** The buffer containing the file data */
+    buffer: Buffer;
+    /** The size of the file in bytes */
+    size: number;
+}
+
+/**
  * Represents a social media post containing an array of media items
  */
 export type Post = {

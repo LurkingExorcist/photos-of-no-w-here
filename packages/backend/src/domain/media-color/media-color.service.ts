@@ -4,10 +4,9 @@ import { Worker } from 'worker_threads';
 import { Injectable, Logger } from '@nestjs/common';
 import { getAverageColor } from 'fast-average-color-node';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/domain/config/config.service';
 
-import { Media } from '../data/types';
-
+import { MediaColorProcessorData } from './color-processor.types';
 import { HSLColor, HexColor, RGBAColor } from './media-color.types';
 import { convertRgbToHsl } from './media-color.utils';
 
@@ -45,21 +44,11 @@ export class MediaColorService {
      * Process media items to generate and cache color matches
      * @param options Configuration for the worker thread
      */
-    public async processMediasToColors(options: {
-        medias: Media[];
-        threadCount: number;
-        workerIndex: number;
-    }): Promise<void> {
+    public async processMediasToColors(
+        options: MediaColorProcessorData
+    ): Promise<void> {
         return new Promise((resolve, reject) => {
-            const worker = new Worker(join(__dirname, 'color-processor.js'), {
-                workerData: {
-                    ...options,
-                    redisConfig: {
-                        host: this.configService.redisHost,
-                        port: this.configService.redisPort,
-                    },
-                },
-            });
+            const worker = this.createWorker(options);
 
             worker.on('message', (message: string) => {
                 this.logger.log(message);
@@ -78,6 +67,33 @@ export class MediaColorService {
                 }
             });
         });
+    }
+
+    private createWorker(options: MediaColorProcessorData) {
+        const workerPath =
+            process.env.NODE_ENV === 'development'
+                ? join(
+                      process.cwd(),
+                      'src/domain/media-color/color-processor.js'
+                  )
+                : join(
+                      process.cwd(),
+                      'dist/src/domain/media-color/color-processor.js'
+                  );
+
+        const worker = new Worker(workerPath, {
+            workerData: {
+                ...options,
+                redisConfig: {
+                    host: this.configService.redisHost,
+                    port: this.configService.redisPort,
+                },
+            },
+            env: {
+                NODE_ENV: process.env.NODE_ENV || 'development',
+            },
+        });
+        return worker;
     }
 
     private convertRgbToHsl(...color: RGBAColor): HSLColor {

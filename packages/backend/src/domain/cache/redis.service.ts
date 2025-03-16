@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import Redis, { ChainableCommander } from 'ioredis';
 
-import { ConfigService } from '@/config/config.service';
+import { ConfigService } from '@/domain/config/config.service';
 
 /**
  * Service for handling Redis cache operations

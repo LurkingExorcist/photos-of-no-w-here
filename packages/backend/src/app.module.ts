@@ -1,6 +1,6 @@
 import { Logger, Module } from '@nestjs/common';
 
-import { ConfigModule } from '@/config/config.module';
+import { ConfigModule } from '@/domain/config/config.module';
 
 import { CacheModule } from './domain/cache/cache.module';
 import { DataModule } from './domain/data/data.module';

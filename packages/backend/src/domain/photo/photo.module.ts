@@ -1,11 +1,11 @@
 import { Logger, Module } from '@nestjs/common';
 
-import { RedisModule } from '@/external/redis/redis.module';
+import { CacheModule } from '../cache/cache.module';
 
 import { PhotoController } from './photo.controller';
 
 @Module({
-    imports: [RedisModule],
+    imports: [CacheModule],
     controllers: [PhotoController],
     providers: [Logger],
 })

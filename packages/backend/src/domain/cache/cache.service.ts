@@ -3,10 +3,10 @@ import os from 'os';
 import { Injectable, Logger } from '@nestjs/common';
 import { sortBy } from 'lodash';
 
-import { RedisService } from '@/external/redis/redis.service';
-import { CacheType, CacheTypeAll } from '@/external/redis/types';
+import { CacheType, CacheTypeAll } from '@/domain/cache/cache.types';
+import { RedisService } from '@/domain/cache/redis.service';
 
-import { Media } from '../data/types';
+import { Media } from '../data/data.types';
 import { MediaColorService } from '../media-color/media-color.service';
 
 import { PrefixerService } from './prefixer.service';
@@ -20,6 +20,30 @@ export class CacheService {
         private readonly prefixer: PrefixerService,
         private readonly mediaColorService: MediaColorService
     ) {}
+
+    /**
+     * Retrieves a value from Redis cache with a prefixed key
+     * @param type - The cache type
+     * @param key - The cache key
+     * @returns The cached value or null if not found
+     */
+    public async get(type: CacheType, key: string): Promise<string> {
+        return await this.redis.get(this.prefixer.prefix(type, key));
+    }
+
+    /**
+     * Sets a value in Redis cache with a prefixed key
+     * @param type - The cache type
+     * @param key - The cache key
+     * @param value - The value to store
+     */
+    public async set(
+        type: CacheType,
+        key: string,
+        value: string
+    ): Promise<void> {
+        await this.redis.set(this.prefixer.prefix(type, key), value);
+    }
 
     /**
      * Verifies and updates the cache for all media items

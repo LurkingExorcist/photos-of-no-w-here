@@ -2,9 +2,7 @@ import { Controller, Get, NotFoundException, Param, Res } from '@nestjs/common';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Response } from 'express';
 
-import { RedisService } from '@/external/redis/redis.service';
-
-import { PrefixerService } from '../cache/prefixer.service';
+import { CacheService } from '../cache/cache.service';
 
 /**
  * Controller responsible for handling photo-related operations
@@ -12,10 +10,7 @@ import { PrefixerService } from '../cache/prefixer.service';
  */
 @Controller('photo')
 export class PhotoController {
-    constructor(
-        private readonly redis: RedisService,
-        private readonly prefixer: PrefixerService
-    ) {}
+    constructor(private readonly cacheService: CacheService) {}
 
     /**
      * Retrieves a photo by its color hex value
@@ -31,8 +26,7 @@ export class PhotoController {
         @Res() response: Response,
         @Param('color') colorHex: string
     ) {
-        const cacheKey = this.prefixer.color(colorHex);
-        const photoPath = await this.redis.get(cacheKey);
+        const photoPath = await this.cacheService.get('color', colorHex);
 
         if (!photoPath) {
             throw new NotFoundException('Photo not found');

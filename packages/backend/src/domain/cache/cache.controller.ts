@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
-import { CacheType, CacheTypeAll } from '@/external/redis/types';
+import { CacheType, CacheTypeAll } from '@/domain/cache/cache.types';
 
-import { Media } from '../data/types';
+import { Media } from '../data/data.types';
 
 import { CacheService } from './cache.service';
 

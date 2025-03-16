@@ -1,9 +1,22 @@
 // @ts-check
+const { join } = require('path');
 const { workerData, parentPort } = require('worker_threads');
 
 const { Redis } = require('ioredis');
 
-const { prefixColor } = require('../cache/prefixer.utils');
+/**
+ * Resolve a path from the root of the project
+ * @param {string} path - The path to resolve
+ * @returns {string} The resolved path
+ */
+const resolveFromRoot = (path) =>
+    join(
+        process.cwd(),
+        process.env.NODE_ENV === 'development' ? 'dist/src' : 'src',
+        path
+    );
+
+const { prefixColor } = require(resolveFromRoot('domain/cache/prefixer.utils'));
 
 if (!parentPort) {
     throw new Error('parentPort is null');
@@ -12,7 +25,7 @@ if (!parentPort) {
 /**
  * @typedef {import('./color-processor.types').MediaColorProcessorData} MediaColorProcessorData
  * @typedef {import('./color-processor.types').RedisConfig} RedisConfig
- * @typedef {import('../data/types').Media} Media
+ * @typedef {import('../data/data.types').Media} Media
  */
 
 /**

@@ -1,4 +1,4 @@
-import type { CacheType } from '@/external/redis/types';
+import type { CacheType } from '@/domain/cache/cache.types';
 
 /**
  * Adds a type prefix to a cache key

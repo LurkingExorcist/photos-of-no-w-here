@@ -7,19 +7,15 @@ import decompress from 'decompress';
 import { isNil, negate } from 'lodash';
 import sharp from 'sharp';
 
-import { RedisService } from '@/external/redis/redis.service';
-import { IReadableFile } from '@/types/common';
-
 import { CacheService } from '../cache/cache.service';
-import { PrefixerService } from '../cache/prefixer.service';
 import { MediaColorService } from '../media-color/media-color.service';
 
 import {
     INSTAGRAM_DATA_PATH,
     POSTS_CONFIG_PATH,
     TEMP_UPLOAD_PATH,
-} from './constants';
-import { Media, Post } from './types';
+} from './data.constants';
+import { IReadableFile, Media, Post } from './data.types';
 
 /**
  * Service for managing Instagram data processing and caching
@@ -27,10 +23,9 @@ import { Media, Post } from './types';
  */
 @Injectable()
 export class DataService {
+    private readonly logger = new Logger(DataService.name);
+
     constructor(
-        private readonly logger: Logger,
-        private readonly redis: RedisService,
-        private readonly prefixer: PrefixerService,
         private readonly cacheService: CacheService,
         private readonly mediaColorService: MediaColorService
     ) {}
@@ -66,8 +61,7 @@ export class DataService {
         const processedMedias: Media[] = [];
 
         for (const { media, location, fileName, extension } of unzippedMedias) {
-            const cacheKey = this.prefixer.media(fileName);
-            const cachedMedia = await this.redis.get(cacheKey);
+            const cachedMedia = await this.cacheService.get('media', fileName);
 
             if (cachedMedia) {
                 processedMedias.push(JSON.parse(cachedMedia));
@@ -76,12 +70,12 @@ export class DataService {
 
             this.logger.log(`Processing file: ${media.uri}...`);
 
-            media.uri = await this.convertMediaToWebp(
+            media.uri = await this.convertMediaToWebp({
                 media,
                 location,
                 fileName,
-                extension
-            );
+                extension,
+            });
 
             if (!media.uri) {
                 continue;
@@ -95,7 +89,11 @@ export class DataService {
 
             processedMedias.push(media);
 
-            await this.redis.set(cacheKey, JSON.stringify(media));
+            await this.cacheService.set(
+                'media',
+                fileName,
+                JSON.stringify(media)
+            );
             this.logger.log(`Media ${fileName} cached successfully`);
         }
 
@@ -148,7 +146,7 @@ export class DataService {
             .then((module) => JSON.parse(module))
             .then((posts) =>
                 posts
-                    .map(async (post: Post) => {
+                    .map((post: Post) => {
                         const {
                             media: [media],
                         } = post;
@@ -166,7 +164,7 @@ export class DataService {
                             );
                         }
 
-                        const [_full, location, fileName, extension] = match;
+                        const [, location, fileName, extension] = match;
 
                         if (extension === 'mp4') {
                             return null;
@@ -196,20 +194,20 @@ export class DataService {
         }));
     }
 
-    private async convertMediaToWebp(
-        media: { uri: string },
-        location: string,
-        fileName: string,
-        extension: string
-    ): Promise<string | null> {
+    private async convertMediaToWebp(options: {
+        media: Media;
+        location: string;
+        fileName: string;
+        extension: string;
+    }): Promise<string | null> {
         try {
-            const newMediaUri = `${location}/${fileName}.webp`;
+            const newMediaUri = `${options.location}/${options.fileName}.webp`;
 
-            switch (extension) {
+            switch (options.extension) {
                 case 'webp':
-                    return media.uri;
+                    return options.media.uri;
                 default:
-                    await sharp(media.uri).webp().toFile(newMediaUri);
+                    await sharp(options.media.uri).webp().toFile(newMediaUri);
 
                     this.logger.log(`Media ${newMediaUri} converted to webp`);
 
@@ -217,7 +215,7 @@ export class DataService {
             }
         } catch (error) {
             this.logger.error(
-                `Error processing media ${media.uri}: ${error.message}`
+                `Error processing media ${options.media.uri}: ${error.message}`
             );
 
             return null;
