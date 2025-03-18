@@ -1,73 +1,145 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Backend Service
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> "The best way to predict the future is to implement it."
+> — Alan Kay
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+A NestJS service that processes and serves photos based on their color characteristics.
 
-## Description
+## Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+The backend service handles:
+- Instagram archive processing
+- Color-based photo analysis
+- RESTful API endpoints
+- Swagger documentation
 
-## Installation
+## API Documentation
 
-```bash
-$ npm install
+Once the service is running, the Swagger documentation is available at:
+```
+http://localhost:3333/api
 ```
 
-## Running the app
+## Endpoints
+
+### Photo Management
+
+- `GET /photo/:color`
+  - Retrieve a photo by its color
+  - Parameters:
+    - `color`: Hex color value without # (e.g., "FF0000" for red)
+  - Returns: Photo file
+  - Error: 404 if no photo matches the color
+
+### Data Management
+
+- `POST /data/upload`
+  - Upload Instagram data archive
+  - Content-Type: multipart/form-data
+  - Parameters:
+    - `archive`: ZIP file containing Instagram data
+  - Returns: Processing result
+  - Error: 400 if file is invalid or processing fails
+
+- `GET /data/media`
+  - Retrieve media items with filtering and pagination
+  - Query Parameters:
+    - `page`: Page number (1-based, default: 1)
+    - `limit`: Items per page (default: 10)
+    - `startDate`: Filter media created after this timestamp
+    - `endDate`: Filter media created before this timestamp
+    - `title`: Filter media by title (case-insensitive partial match)
+    - `uri`: Filter media by URI (case-insensitive partial match)
+  - Returns: Paginated response with media items
+  ```json
+  {
+    "items": [...],
+    "total": number,
+    "page": number,
+    "limit": number,
+    "totalPages": number
+  }
+  ```
+
+### Cache Management
+
+- `GET /cache/stats`
+  - Get current cache statistics
+  - Returns: Cache statistics information
+
+- `POST /cache/verify`
+  - Verify and update the cache for all processed media items
+  - Returns: Verification result
+
+- `POST /cache/clear`
+  - Clear the cache for specified type
+  - Query Parameters:
+    - `type`: Cache type to clear (optional)
+      - `all`: Clear all caches
+      - `color`: Clear color cache
+      - `media`: Clear media cache
+  - Returns: Clearing result
+
+- `GET /cache/slice`
+  - Get a slice of cache entries for a specific type
+  - Query Parameters:
+    - `type`: Cache type to get entries from (required)
+      - `color`: Color cache entries
+      - `media`: Media cache entries
+    - `start`: Starting index (0-based, optional)
+    - `count`: Number of entries to return (optional)
+  - Returns: Array of cache entries
+
+## Development
+
+### Prerequisites
+
+- Node.js ≥ v18
+- npm or yarn
+
+### Installation
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Test
+### Running the Service
 
 ```bash
-# unit tests
-$ npm run test
+# Development mode
+npm run start:dev
 
-# e2e tests
-$ npm run test:e2e
+# Production mode
+npm run start:prod
 
-# test coverage
-$ npm run test:cov
+# Watch mode
+npm run start:watch
 ```
 
-## Support
+### Testing
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Unit tests
+npm run test
 
-## Stay in touch
+# E2E tests
+npm run test:e2e
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Test coverage
+npm run test:cov
+```
+
+## Project Structure
+
+```
+src/
+├── controllers/    # API endpoints
+├── services/       # Business logic
+├── interfaces/     # TypeScript interfaces
+├── dto/           # Data transfer objects
+└── main.ts        # Application entry point
+```
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+MIT License
