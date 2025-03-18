@@ -1,7 +1,6 @@
 import os from 'os';
 
 import { Injectable, Logger } from '@nestjs/common';
-import { sortBy } from 'lodash';
 
 import { CacheType, CacheTypeAll } from '@/domain/cache/cache.types';
 import { RedisService } from '@/domain/cache/redis.service';
@@ -52,15 +51,11 @@ export class CacheService {
     public async verifyCache(inputMedias: Media[]): Promise<void> {
         this.logger.log('Starting cache verification...');
 
-        const medias = sortBy(inputMedias, (media) => media.average_color);
-
-        this.logger.log('Updating cache...');
-
         const threadCount = os.cpus().length;
         await Promise.all(
             Array.from({ length: threadCount }, (_, workerIndex) =>
                 this.mediaColorService.processMediasToColors({
-                    medias,
+                    medias: inputMedias,
                     threadCount,
                     workerIndex,
                 })
@@ -68,6 +63,62 @@ export class CacheService {
         );
 
         this.logger.log('Cache verification completed');
+    }
+
+    /**
+     * Get a slice of cache entries for a specific type
+     * @param type - The type of cache to get entries from
+     * @param start - Starting index (0-based)
+     * @param count - Number of entries to return
+     * @returns Array of cache entries with their keys and values
+     */
+    public async getCacheSlice(
+        type: CacheType,
+        start: number = 0,
+        count: number = 10
+    ): Promise<Array<{ key: string; value: string }>> {
+        this.logger.log(
+            `Getting cache slice for type: ${type}, start: ${start}, count: ${count}`
+        );
+
+        let cursor = '0';
+        let entries: Array<{ key: string; value: string }> = [];
+        let currentIndex = 0;
+
+        do {
+            const [nextCursor, keys] = await this.redis.scan(
+                cursor,
+                `${type}:*`,
+                100
+            );
+            cursor = nextCursor;
+
+            if (keys.length > 0) {
+                const values = await Promise.all(
+                    keys.map(async (key) => ({
+                        key,
+                        value: await this.redis.get(key),
+                    }))
+                );
+
+                // Filter entries based on start and count
+                const filteredValues = values.filter((_, index) => {
+                    const globalIndex = currentIndex + index;
+                    return globalIndex >= start && globalIndex < start + count;
+                });
+
+                entries = entries.concat(filteredValues);
+                currentIndex += keys.length;
+
+                // Break if we have enough entries
+                if (entries.length >= count) {
+                    entries = entries.slice(0, count);
+                    break;
+                }
+            }
+        } while (cursor !== '0');
+
+        return entries;
     }
 
     /**

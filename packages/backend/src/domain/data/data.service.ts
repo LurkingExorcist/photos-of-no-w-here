@@ -17,6 +17,23 @@ import {
 } from './data.constants';
 import { IReadableFile, Media, Post } from './data.types';
 
+interface GetMediaOptions {
+    page: number;
+    limit: number;
+    startDate?: number;
+    endDate?: number;
+    title?: string;
+    uri?: string;
+}
+
+interface PaginatedResponse<T> {
+    items: T[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
 /**
  * Service for managing Instagram data processing and caching
  * Handles file uploads, media processing, and cache management
@@ -98,6 +115,62 @@ export class DataService {
         }
 
         return processedMedias;
+    }
+
+    /**
+     * Retrieves media items with filtering and pagination
+     * @param options - Filtering and pagination options
+     * @returns Promise resolving to paginated media items
+     */
+    public async getMedia(
+        options: GetMediaOptions
+    ): Promise<PaginatedResponse<Media>> {
+        const { page, limit, startDate, endDate, title, uri } = options;
+        const unzippedMedias = await this.getUnzippedMedias();
+
+        // Extract just the media items from the unzipped data
+        let mediaItems = unzippedMedias.map((item) => item.media);
+
+        // Apply filters
+        if (startDate) {
+            mediaItems = mediaItems.filter(
+                (media) => media.creation_timestamp >= startDate
+            );
+        }
+        if (endDate) {
+            mediaItems = mediaItems.filter(
+                (media) => media.creation_timestamp <= endDate
+            );
+        }
+        if (title) {
+            const searchTitle = title.toLowerCase();
+            mediaItems = mediaItems.filter((media) =>
+                media.title.toLowerCase().includes(searchTitle)
+            );
+        }
+        if (uri) {
+            const searchUri = uri.toLowerCase();
+            mediaItems = mediaItems.filter((media) =>
+                media.uri.toLowerCase().includes(searchUri)
+            );
+        }
+
+        // Calculate pagination
+        const total = mediaItems.length;
+        const totalPages = Math.ceil(total / limit);
+        const startIndex = (page - 1) * limit;
+        const endIndex = Math.min(startIndex + limit, total);
+
+        // Get the page of items
+        const items = mediaItems.slice(startIndex, endIndex);
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages,
+        };
     }
 
     /**

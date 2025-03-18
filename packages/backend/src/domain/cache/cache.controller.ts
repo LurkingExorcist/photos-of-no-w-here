@@ -3,6 +3,7 @@ import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 import { CacheType, CacheTypeAll } from '@/domain/cache/cache.types';
 
+import { DataService } from '../data/data.service';
 import { Media } from '../data/data.types';
 
 import { CacheService } from './cache.service';
@@ -13,7 +14,10 @@ import { CacheService } from './cache.service';
 @ApiTags('Cache Management')
 @Controller('cache')
 export class CacheController {
-    constructor(private readonly cacheService: CacheService) {}
+    constructor(
+        private readonly cacheService: CacheService,
+        private readonly dataService: DataService
+    ) {}
 
     /**
      * Get the current cache statistics
@@ -34,8 +38,10 @@ export class CacheController {
         summary: 'Verify and update the cache for the given media items',
     })
     @Post('verify')
-    public async verifyCache(@Body() { medias }: { medias: Media[] }) {
-        return this.cacheService.verifyCache(medias);
+    public async verifyCache() {
+        return this.dataService
+            .getProcessedMedias()
+            .then((medias) => this.cacheService.verifyCache(medias));
     }
 
     /**
@@ -54,5 +60,43 @@ export class CacheController {
     @Post('clear')
     public async clearCache(@Query('type') type?: CacheType | CacheTypeAll) {
         return this.cacheService.clearCache(type);
+    }
+
+    /**
+     * Get a slice of cache entries for a specific type
+     * @param type - The type of cache to get entries from
+     * @param start - Starting index (0-based)
+     * @param count - Number of entries to return
+     * @returns Promise resolving to an array of cache entries
+     */
+    @ApiOperation({
+        summary: 'Get a slice of cache entries for a specific type',
+    })
+    @ApiQuery({
+        name: 'type',
+        type: 'enum',
+        enum: ['color', 'media'] satisfies CacheType[],
+        required: true,
+        description: 'The type of cache to get entries from',
+    })
+    @ApiQuery({
+        name: 'start',
+        type: 'number',
+        required: false,
+        description: 'Starting index (0-based)',
+    })
+    @ApiQuery({
+        name: 'count',
+        type: 'number',
+        required: false,
+        description: 'Number of entries to return',
+    })
+    @Get('slice')
+    public async getCacheSlice(
+        @Query('type') type: CacheType,
+        @Query('start') start?: number,
+        @Query('count') count?: number
+    ) {
+        return this.cacheService.getCacheSlice(type, start, count);
     }
 }

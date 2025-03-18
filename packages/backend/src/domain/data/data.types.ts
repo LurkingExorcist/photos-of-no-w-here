@@ -40,12 +40,15 @@ export type Media = {
     title: string;
     /** Information about the original source if cross-posted */
     cross_post_source: CrossPostSource;
+    /** Backup URI for the media */
+    backup_uri: string;
     /** Computed average color of the media in hex format (e.g. "#FFFFFF") */
     average_color?: string;
     /** Raw RGBA values of the computed average color [r, g, b, a] */
     average_color_rgba?: RGBAColor;
     /** Computed average color of the media in HSL format [h, s, l] */
     average_color_hsl?: HSLColor;
+    average_color_hsl_number?: string;
 };
 
 /**
@@ -56,6 +59,11 @@ export type CrossPostSource = {
     source_app: string;
 };
 
+export type CameraMetadata = {
+    /** Whether the camera metadata is available */
+    has_camera_metadata: boolean;
+};
+
 /**
  * Container for either photo or video metadata
  */
@@ -64,6 +72,9 @@ export type MediaMetadata = {
     photo_metadata?: PhotoMetadata;
     /** Metadata specific to video media */
     video_metadata?: VideoMetadata;
+
+    /** Metadata specific to photo media */
+    camera_metadata?: CameraMetadata;
 };
 
 /**
@@ -123,3 +134,19 @@ export type WorkerData = {
     /** Index of this worker thread (0-based) */
     workerIndex: number;
 };
+
+/**
+ * Represents a paginated response for any type of data
+ */
+export interface PaginatedResponse<T> {
+    /** Array of items for the current page */
+    items: T[];
+    /** Total number of items across all pages */
+    total: number;
+    /** Current page number (1-based) */
+    page: number;
+    /** Number of items per page */
+    limit: number;
+    /** Total number of pages */
+    totalPages: number;
+}

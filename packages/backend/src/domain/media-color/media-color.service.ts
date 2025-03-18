@@ -3,12 +3,13 @@ import { Worker } from 'worker_threads';
 
 import { Injectable, Logger } from '@nestjs/common';
 import { getAverageColor } from 'fast-average-color-node';
+import { sortBy } from 'lodash';
 
 import { ConfigService } from '@/domain/config/config.service';
 
 import { MediaColorProcessorData } from './color-processor.types';
+import { rgbToHsl } from './color-processor.utils';
 import { HSLColor, HexColor, RGBAColor } from './media-color.types';
-import { convertRgbToHsl } from './media-color.utils';
 
 @Injectable()
 export class MediaColorService {
@@ -30,7 +31,7 @@ export class MediaColorService {
             return {
                 hex: color.hex,
                 rgba: color.value,
-                hsl: this.convertRgbToHsl(...color.value),
+                hsl: rgbToHsl(...color.value),
             };
         } catch (error) {
             this.logger.error(
@@ -48,7 +49,15 @@ export class MediaColorService {
         options: MediaColorProcessorData
     ): Promise<void> {
         return new Promise((resolve, reject) => {
-            const worker = this.createWorker(options);
+            const worker = this.createWorker({
+                ...options,
+                medias: sortBy(options.medias, (media) => {
+                    const [h, s, l] = media.average_color_hsl;
+
+                    // Parameters priority: hue, lightness, saturation
+                    return [h, l, s].map((c) => Math.floor(c * 256)).join('');
+                }),
+            });
 
             worker.on('message', (message: string) => {
                 this.logger.log(message);
@@ -74,7 +83,7 @@ export class MediaColorService {
             process.env.NODE_ENV === 'development'
                 ? join(
                       process.cwd(),
-                      'src/domain/media-color/color-processor.js'
+                      'src/domain/media-color/color-processor.ts'
                   )
                 : join(
                       process.cwd(),
@@ -92,11 +101,11 @@ export class MediaColorService {
             env: {
                 NODE_ENV: process.env.NODE_ENV || 'development',
             },
+            execArgv:
+                process.env.NODE_ENV === 'development'
+                    ? ['-r', 'ts-node/register']
+                    : undefined,
         });
         return worker;
-    }
-
-    private convertRgbToHsl(...color: RGBAColor): HSLColor {
-        return convertRgbToHsl(...color);
     }
 }
