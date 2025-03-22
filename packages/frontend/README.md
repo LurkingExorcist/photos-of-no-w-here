@@ -1,82 +1,62 @@
-# Frontend Service
+# Infinite Photo Grid
 
-> "Design is not just what it looks like and feels like. Design is how it works."
-> — Steve Jobs
-
-A React application for exploring photos through color-based navigation.
-
-## Overview
-
-The frontend service provides:
-- Color-based photo exploration
-- Instagram archive upload interface
-- Responsive design
-- Modern React with TypeScript
+A React application that implements an infinite, color-based photo grid with panning, zooming, and smart photo placement based on color similarity.
 
 ## Features
 
-- **Color Navigation**: Browse photos by selecting specific colors
-- **Archive Upload**: Upload and process Instagram data archives
-- **Media Gallery**: View and filter processed media items
-- **Cache Management**: Monitor and manage photo cache
+- **Infinite Pan and Zoom**: Smoothly navigate through the grid with intuitive panning and zooming.
+- **Color-Based Photo Placement**: Photos are positioned in the grid based on their color similarity.
+- **Dynamic Loading**: Photos are lazily loaded as they're needed, with color placeholders shown during loading.
+- **Multiple Color Metrics**: Choose between RGB (Euclidean distance) and Lab (Delta E) color similarity metrics.
 
-## Development
+## Technologies Used
+
+- React with TypeScript
+- TailwindCSS for styling
+- react-spring for smooth animations
+- @use-gesture/react for gesture handling
+- chroma-js for color manipulation
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js ≥ v18
+- Node.js 16+ 
 - npm or yarn
 
 ### Installation
 
-```bash
-npm install
-```
+1. Clone the repository
+2. Navigate to the frontend directory:
+   ```
+   cd packages/frontend
+   ```
+3. Install dependencies:
+   ```
+   npm install
+   ```
 
-### Running the Application
+### Running the App
 
 ```bash
-# Development mode
 npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
 ```
 
-### Available Scripts
+This will start the development server. Open your browser and navigate to the URL displayed in the terminal (usually http://localhost:5173).
 
-- `npm run dev` — Start development server
-- `npm run build` — Build for production
-- `npm run preview` — Preview production build
-- `npm run lint` — Run ESLint
+## Usage
 
-## Project Structure
+- **Pan**: Click and drag to move around the grid
+- **Zoom**: Use mouse wheel or pinch gesture to zoom in and out
+- **Settings**: Use the settings panel in the top-right corner to change the color similarity metric
+- **Add Photos**: Click the "Add More Photos" button to generate additional random photos
 
-```
-src/
-├── assets/        # Static assets
-├── components/    # React components
-├── styles/        # CSS and style files
-├── App.tsx        # Main application component
-└── main.tsx       # Application entry point
-```
+## How It Works
 
-## Environment Variables
+The application uses a force-directed layout algorithm to position photos based on their color similarity. Similar colors are positioned closer together, creating a natural gradient effect across the grid.
 
-The application expects the following environment variables:
-
-- `VITE_API_URL`: Backend API URL (default: http://localhost:3333)
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+When a photo hasn't been loaded yet, a placeholder with the photo's average color is displayed. Photos are fetched from a simulated API that associates photos with specific colors.
 
 ## License
 
-MIT License
+MIT

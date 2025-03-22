@@ -7,7 +7,7 @@ COPY package*.json ./
 COPY packages/backend/package*.json ./packages/backend/
 
 # Install dependencies
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source files
 COPY packages/backend ./packages/backend
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/packages/backend/package*.json ./packages/backend/
 
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 # Copy built application
 COPY --from=builder /app/packages/backend/dist ./packages/backend/dist
