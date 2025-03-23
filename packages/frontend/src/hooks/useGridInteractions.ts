@@ -116,11 +116,28 @@ export const useGridInteractions = ({
         }
     }, []);
 
-    // Set up drag gesture - simpler implementation
+    // Set up drag gesture - enhanced implementation for reliability
     const bindDrag = useDrag(
-        ({ active, first, last, xy: [clientX, clientY] }) => {
+        ({ active, first, last, xy: [clientX, clientY], event, memo = 0 }) => {
             // Skip if we're pinching
             if (pinchRef.current.active) return;
+
+            // Ensure we're handling the event exclusively
+            if (
+                event &&
+                'stopPropagation' in event &&
+                typeof event.stopPropagation === 'function'
+            ) {
+                event.stopPropagation();
+            }
+
+            if (
+                event &&
+                'preventDefault' in event &&
+                typeof event.preventDefault === 'function'
+            ) {
+                event.preventDefault();
+            }
 
             // On first touch/click
             if (first) {
@@ -136,6 +153,9 @@ export const useGridInteractions = ({
 
                 // Stop any animations
                 cancelAnimation();
+
+                // Return something as memo to track this drag from start
+                return Date.now();
             }
 
             // While dragging
@@ -162,10 +182,19 @@ export const useGridInteractions = ({
                     y: position.y,
                 };
             }
+
+            // Pass along memo for tracking
+            return memo;
         },
         {
             filterTaps: true,
             pointer: { touch: true }, // Enable touch support
+            // Increase the drag threshold to avoid accidental drags
+            threshold: 5,
+            // Use passive: false to allow preventDefault to work properly
+            eventOptions: { passive: false },
+            // Capture events at the earliest phase
+            capture: true,
         }
     );
 
@@ -206,6 +235,10 @@ export const useGridInteractions = ({
         },
         {
             pointer: { touch: true },
+            // Use passive: false to allow preventDefault
+            eventOptions: { passive: false },
+            // Capture events at the earliest phase
+            capture: true,
         }
     );
 
@@ -238,7 +271,11 @@ export const useGridInteractions = ({
                 animationRef.current = requestAnimationFrame(animate);
             }
         },
-        { preventDefault: true }
+        {
+            preventDefault: true,
+            // Capture events at the earliest phase
+            capture: true,
+        }
     );
 
     // Helper function to reset view

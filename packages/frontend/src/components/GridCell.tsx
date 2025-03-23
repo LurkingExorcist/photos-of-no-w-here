@@ -35,20 +35,34 @@ export const GridCell: React.FC<GridCellProps> = ({ cell, size }) => {
         };
     }, []);
 
+    // Prevent default behavior for drag events
+    const preventDragDefault = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    };
+
     return (
         <div
             ref={cellRef}
-            className="relative"
+            className="relative grid-cell"
             style={{
                 width: size,
                 height: size,
                 backgroundColor: `#${cell.color}`, // Show color as background while loading
+                pointerEvents: 'none', // Pass through all pointer events
             }}
+            draggable="false"
+            onDragStart={preventDragDefault}
         >
             {isVisible && (
                 <img
                     src={`http://localhost:3333/photo/${cell.color}`}
                     className="w-full h-full object-cover"
+                    alt={`Color #${cell.color}`}
+                    draggable="false"
+                    onDragStart={preventDragDefault}
+                    style={{ pointerEvents: 'none' }}
                     onError={() => {
                         console.error(
                             `Failed to load image for color ${cell.color}`

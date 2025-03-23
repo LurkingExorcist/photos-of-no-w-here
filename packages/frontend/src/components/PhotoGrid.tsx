@@ -54,13 +54,28 @@ const PhotoGrid: React.FC<PhotoGridProps> = () => {
     }, []);
 
     // This effect adds GPU acceleration hints for smoother animations
+    // and prevents child elements from capturing drag events
     useEffect(() => {
         if (gridRef.current) {
+            // Add GPU acceleration to the container
             const nodes = gridRef.current.querySelectorAll('.gpu-accelerated');
             nodes.forEach((node) => {
                 // Force GPU acceleration
                 (node as HTMLElement).style.transform = 'translateZ(0)';
                 (node as HTMLElement).style.backfaceVisibility = 'hidden';
+            });
+
+            // Make all image elements non-draggable
+            const images = gridRef.current.querySelectorAll('img');
+            images.forEach((img) => {
+                img.setAttribute('draggable', 'false');
+                img.style.pointerEvents = 'none';
+            });
+
+            // Disable pointer events on all child elements
+            const gridItems = gridRef.current.querySelectorAll('.grid-cell');
+            gridItems.forEach((item) => {
+                (item as HTMLElement).style.pointerEvents = 'none';
             });
         }
     }, [gridRef]);
@@ -69,6 +84,13 @@ const PhotoGrid: React.FC<PhotoGridProps> = () => {
     useEffect(() => {
         console.log('Drag state:', { isDragging, x, y });
     }, [isDragging, x, y]);
+
+    // Prevent default behavior for drag events
+    const preventDragDefault = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    };
 
     if (loading) {
         return (
@@ -84,6 +106,7 @@ const PhotoGrid: React.FC<PhotoGridProps> = () => {
         <div
             className="relative w-full h-screen overflow-hidden bg-gray-900"
             {...bindWheel()}
+            onDragStart={preventDragDefault}
         >
             {/* Help overlay */}
             {showHelp && (
@@ -142,12 +165,17 @@ const PhotoGrid: React.FC<PhotoGridProps> = () => {
                     touchAction: 'none',
                     userSelect: 'none',
                 }}
+                onDragStart={preventDragDefault}
+                draggable="false"
             >
                 <div
                     className="absolute top-1/2 left-1/2 origin-center will-change-transform gpu-accelerated"
                     style={{
                         transform: `translate3d(${x}px, ${y}px, 0) scale(${currentScale})`,
+                        pointerEvents: 'none',
                     }}
+                    onDragStart={preventDragDefault}
+                    draggable="false"
                 >
                     {chunks.map((chunk) => (
                         <GridChunk

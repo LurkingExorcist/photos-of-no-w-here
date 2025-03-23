@@ -15,6 +15,13 @@ export const GridChunk: React.FC<GridChunkProps> = ({
     cellSize,
     chunkSize,
 }) => {
+    // Prevent default behavior for drag events
+    const preventDragDefault = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    };
+
     return (
         <div
             className="absolute"
@@ -23,7 +30,10 @@ export const GridChunk: React.FC<GridChunkProps> = ({
                 top: chunk.y * chunkSize * cellSize,
                 width: chunkSize * cellSize,
                 height: chunkSize * cellSize,
+                pointerEvents: 'none', // Pass through all pointer events
             }}
+            draggable="false"
+            onDragStart={preventDragDefault}
         >
             <div
                 className="grid"
@@ -32,7 +42,10 @@ export const GridChunk: React.FC<GridChunkProps> = ({
                     gridTemplateRows: `repeat(${chunkSize}, ${cellSize}px)`,
                     width: '100%',
                     height: '100%',
+                    pointerEvents: 'none', // Pass through all pointer events
                 }}
+                draggable="false"
+                onDragStart={preventDragDefault}
             >
                 {chunk.cells.map((row, y) =>
                     row.map((cell, x) => (
