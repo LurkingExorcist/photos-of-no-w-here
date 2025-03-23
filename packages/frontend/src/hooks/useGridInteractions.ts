@@ -1,6 +1,7 @@
-import { useCallback, useEffect } from 'react';
+import { useDrag, usePinch, useWheel } from '@use-gesture/react';
+import { useCallback, useEffect, useRef } from 'react';
 
-import type { DragStart, GridPosition } from './usePhotoGrid';
+import type { GridPosition } from './usePhotoGrid';
 
 interface UseGridInteractionsProps {
     position: GridPosition;
@@ -9,9 +10,15 @@ interface UseGridInteractionsProps {
     setScale: (scale: number) => void;
     isDragging: boolean;
     setIsDragging: (isDragging: boolean) => void;
-    dragStartRef: React.MutableRefObject<DragStart>;
     minZoom: number;
     maxZoom: number;
+}
+
+interface DragStartPosition {
+    x: number;
+    y: number;
+    clientX: number;
+    clientY: number;
 }
 
 export const useGridInteractions = ({
@@ -21,74 +28,248 @@ export const useGridInteractions = ({
     setScale,
     isDragging,
     setIsDragging,
-    dragStartRef,
     minZoom,
     maxZoom,
 }: UseGridInteractionsProps) => {
-    // Mouse down handler for dragging
-    const handleMouseDown = useCallback(
-        (e: React.MouseEvent) => {
-            e.preventDefault();
-            setIsDragging(true);
-            dragStartRef.current = {
-                x: e.clientX,
-                y: e.clientY,
-                posX: position.x,
-                posY: position.y,
+    // Track last animation request for smooth animations
+    const animationRef = useRef<number | null>(null);
+
+    // Track drag start position for more accurate calculations
+    const dragStartRef = useRef<DragStartPosition>({
+        x: 0,
+        y: 0,
+        clientX: 0,
+        clientY: 0,
+    });
+
+    // Track pinch state
+    const pinchRef = useRef({
+        active: false,
+        initialScale: 1,
+    });
+
+    // Target values for smooth animations
+    const targetRef = useRef({
+        x: position.x,
+        y: position.y,
+        scale: scale,
+    });
+
+    // Synchronize target with position when not dragging
+    useEffect(() => {
+        if (!isDragging && !pinchRef.current.active) {
+            targetRef.current = {
+                x: position.x,
+                y: position.y,
+                scale: scale,
             };
+        }
+    }, [position.x, position.y, scale, isDragging]);
+
+    // Animate smoothly to target values
+    const animate = useCallback(() => {
+        if (isDragging || pinchRef.current.active) {
+            // Don't animate while dragging or pinching for more responsive feel
+            animationRef.current = null;
+            return;
+        }
+
+        const target = targetRef.current;
+        const dx = target.x - position.x;
+        const dy = target.y - position.y;
+        const dScale = target.scale - scale;
+
+        // If we're close enough to the target, snap to it
+        const isXDone = Math.abs(dx) < 0.5;
+        const isYDone = Math.abs(dy) < 0.5;
+        const isScaleDone = Math.abs(dScale) < 0.005;
+
+        if (isXDone && isYDone && isScaleDone) {
+            // Animation complete, set exact values
+            if (position.x !== target.x || position.y !== target.y) {
+                setPosition({ x: target.x, y: target.y });
+            }
+            if (scale !== target.scale) {
+                setScale(target.scale);
+            }
+            animationRef.current = null;
+            return;
+        }
+
+        // Animation still in progress, apply easing
+        const ease = 0.15;
+        setPosition({
+            x: position.x + dx * ease,
+            y: position.y + dy * ease,
+        });
+        setScale(scale + dScale * ease);
+
+        // Continue animation
+        animationRef.current = requestAnimationFrame(animate);
+    }, [position, scale, setPosition, setScale, isDragging]);
+
+    // Cancel animations on unmount
+    const cancelAnimation = useCallback(() => {
+        if (animationRef.current !== null) {
+            cancelAnimationFrame(animationRef.current);
+            animationRef.current = null;
+        }
+    }, []);
+
+    // Set up drag gesture - simpler implementation
+    const bindDrag = useDrag(
+        ({ active, first, last, xy: [clientX, clientY] }) => {
+            // Skip if we're pinching
+            if (pinchRef.current.active) return;
+
+            // On first touch/click
+            if (first) {
+                setIsDragging(true);
+
+                // Record starting positions
+                dragStartRef.current = {
+                    x: position.x,
+                    y: position.y,
+                    clientX,
+                    clientY,
+                };
+
+                // Stop any animations
+                cancelAnimation();
+            }
+
+            // While dragging
+            if (active) {
+                // Calculate how far we've moved
+                const dx = clientX - dragStartRef.current.clientX;
+                const dy = clientY - dragStartRef.current.clientY;
+
+                // Update position directly for immediate feedback
+                setPosition({
+                    x: dragStartRef.current.x + dx,
+                    y: dragStartRef.current.y + dy,
+                });
+            }
+
+            // On release
+            if (last) {
+                setIsDragging(false);
+
+                // Update target position to current position
+                targetRef.current = {
+                    ...targetRef.current,
+                    x: position.x,
+                    y: position.y,
+                };
+            }
         },
-        [setIsDragging, position, dragStartRef]
+        {
+            filterTaps: true,
+            pointer: { touch: true }, // Enable touch support
+        }
     );
 
-    // Mouse move handler for dragging
-    const handleMouseMove = useCallback(
-        (e: MouseEvent) => {
-            if (!isDragging) return;
+    // Set up pinch gesture for touch zoom
+    const bindPinch = usePinch(
+        ({ active, first, last, offset: [d] }) => {
+            // On pinch start
+            if (first) {
+                pinchRef.current.active = true;
+                pinchRef.current.initialScale = scale;
 
-            const dx = e.clientX - dragStartRef.current.x;
-            const dy = e.clientY - dragStartRef.current.y;
-            setPosition({
-                x: dragStartRef.current.posX + dx,
-                y: dragStartRef.current.posY + dy,
-            });
+                // Stop any animations
+                cancelAnimation();
+            }
+
+            // During pinch
+            if (active) {
+                // Calculate new scale
+                const newScale = Math.max(
+                    minZoom,
+                    Math.min(maxZoom, (pinchRef.current.initialScale * d) / 100)
+                );
+
+                // Update scale directly
+                setScale(newScale);
+            }
+
+            // On pinch end
+            if (last) {
+                pinchRef.current.active = false;
+
+                // Update target scale to current scale
+                targetRef.current = {
+                    ...targetRef.current,
+                    scale: scale,
+                };
+            }
         },
-        [isDragging, setPosition, dragStartRef]
+        {
+            pointer: { touch: true },
+        }
     );
 
-    // Mouse up handler for ending drag
-    const handleMouseUp = useCallback(() => {
-        setIsDragging(false);
-    }, [setIsDragging]);
+    // Set up wheel gesture for zooming
+    const bindWheel = useWheel(
+        ({ delta: [, dy], event }) => {
+            // Skip if we're pinching
+            if (pinchRef.current.active) return;
 
-    // Wheel handler for zooming
-    const handleWheel = useCallback(
-        (e: React.WheelEvent) => {
-            e.preventDefault();
-            const delta = e.deltaY * -0.0001;
+            event.preventDefault();
+
+            // Calculate new scale
+            const delta = dy * -0.002;
             const newScale = Math.max(
                 minZoom,
                 Math.min(maxZoom, scale + delta)
             );
+
+            // Update scale directly for immediate feedback
             setScale(newScale);
+
+            // Update target for smooth finish
+            targetRef.current = {
+                ...targetRef.current,
+                scale: newScale,
+            };
+
+            // Start animation if needed for smooth effect
+            if (animationRef.current === null && !isDragging) {
+                animationRef.current = requestAnimationFrame(animate);
+            }
         },
-        [scale, setScale, minZoom, maxZoom]
+        { preventDefault: true }
     );
 
-    // Add and remove event listeners for drag
-    useEffect(() => {
-        if (isDragging) {
-            document.addEventListener('mousemove', handleMouseMove);
-            document.addEventListener('mouseup', handleMouseUp);
-        }
+    // Helper function to reset view
+    const resetView = useCallback(() => {
+        // Cancel any existing animation
+        cancelAnimation();
 
-        return () => {
-            document.removeEventListener('mousemove', handleMouseMove);
-            document.removeEventListener('mouseup', handleMouseUp);
+        // Set target to default position
+        targetRef.current = {
+            x: 0,
+            y: 0,
+            scale: 1,
         };
-    }, [isDragging, handleMouseMove, handleMouseUp]);
+
+        // Start animation
+        animationRef.current = requestAnimationFrame(animate);
+    }, [animate, cancelAnimation]);
+
+    // Combine gesture bindings
+    const combinedBindings = {
+        ...bindDrag(),
+        ...bindPinch(),
+    };
 
     return {
-        handleMouseDown,
-        handleWheel,
+        bindDrag: () => combinedBindings,
+        bindWheel,
+        resetView,
+        // Return current transform values directly
+        x: position.x,
+        y: position.y,
+        scale: scale,
     };
 };

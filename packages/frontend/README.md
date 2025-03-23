@@ -8,14 +8,17 @@ A React application that implements an infinite, color-based photo grid with pan
 - **Color-Based Photo Placement**: Photos are positioned in the grid based on their color similarity.
 - **Dynamic Loading**: Photos are lazily loaded as they're needed, with color placeholders shown during loading.
 - **Multiple Color Metrics**: Choose between RGB (Euclidean distance) and Lab (Delta E) color similarity metrics.
+- **Integration with Backend**: Works seamlessly with the backend service to retrieve photos by color.
+- **Responsive Design**: Adapts to different screen sizes and device types.
+- **Visual Clustering**: Similar colors are visually clustered together, creating natural gradients across the grid.
 
 ## Technologies Used
 
 - React with TypeScript
 - TailwindCSS for styling
-- react-spring for smooth animations
 - @use-gesture/react for gesture handling
 - chroma-js for color manipulation
+- Modern React hooks for state management
 
 ## Getting Started
 

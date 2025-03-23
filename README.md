@@ -5,13 +5,16 @@
 
 A minimalist photo management platform built with modern TypeScript. Where pixels meet poetry.
 
+## Project Overview
+
+Photos of no-w-here is a specialized photo management platform that organizes and displays photos based on their color characteristics. The platform processes Instagram data archives, analyzes photos based on their colors, and provides an intuitive, infinite grid interface for exploring your visual memories through the lens of color similarity.
+
 ## Architecture
 
-A monorepo structure housing three distinct components:
+A monorepo structure housing two main components:
 
-- `frontend/`: A React application that renders your visual memories
-- `backend/`: A NestJS service orchestrating the digital darkroom
-- `frontend_old/`: Legacy implementation (archived)
+- `frontend/`: A React application that renders an infinite, color-based photo grid with panning, zooming, and smart photo placement based on color similarity.
+- `backend/`: A NestJS service that processes Instagram archives, performs color-based photo analysis, and serves photos through a RESTful API.
 
 ## Requirements
 
@@ -65,28 +68,34 @@ Docker configurations are available for both environments:
 - `docker-compose.yml` — Production environment
 - `docker-compose.dev.yml` — Development environment
 
+## API Documentation
 
 After starting the containers, the Swagger documentation is available at:
 ```
 http://localhost:3333/api
 ```
 
-## API Endpoints
+## Key Features
 
-### Photo Management
-
-- `POST /data/upload` — Upload Instagram archive
-  - Accepts ZIP archive containing Instagram data
-  - Processes and stores photos for color-based retrieval
-
-- `GET /photo/:color` — Retrieve photos by color
-  - Returns photos matching the specified color
-  - Supports only hex color format without #
+- **Instagram Archive Processing**: Upload and process your Instagram data exports
+- **Color-Based Photo Analysis**: Photos are analyzed for their color characteristics
+- **Infinite Pan and Zoom**: Navigate through your photo collection with intuitive controls
+- **Color-Based Placement**: Similar colors are positioned closer together in the grid
+- **Dynamic Loading**: Photos load as you explore, with color placeholders shown during loading
 
 ## Tech Stack
 
-- **Frontend**: React + TypeScript
-- **Backend**: NestJS + TypeScript
+- **Frontend**: 
+  - React + TypeScript
+  - TailwindCSS
+  - @use-gesture/react for pan/zoom interactions
+  - chroma-js for color manipulation
+
+- **Backend**: 
+  - NestJS + TypeScript
+  - RESTful API design
+  - Swagger documentation
+
 - **Development**:
   - TypeScript
   - ESLint

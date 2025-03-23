@@ -8,10 +8,19 @@ A NestJS service that processes and serves photos based on their color character
 ## Overview
 
 The backend service handles:
-- Instagram archive processing
-- Color-based photo analysis
-- RESTful API endpoints
-- Swagger documentation
+- Instagram archive processing and extraction
+- Color-based photo analysis and classification
+- RESTful API endpoints for photo retrieval
+- Color similarity calculation for the frontend grid
+- Efficient cache management for performance optimization
+
+## Key Features
+
+- **Instagram Data Processing**: Extract and process photos from Instagram data exports
+- **Color Analysis**: Analyze photos for their predominant colors and color characteristics
+- **Color-Based Retrieval**: Find and return photos based on color similarity
+- **Caching**: Efficient caching system for optimized performance
+- **Comprehensive API**: Well-documented endpoints with Swagger integration
 
 ## API Documentation
 

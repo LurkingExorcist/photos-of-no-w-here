@@ -139,7 +139,7 @@ export const usePhotoGrid = () => {
         });
 
         setChunks(newChunks);
-    }, [position, scale, getVisibleChunks, chunks, generateChunk]);
+    }, [position, scale, chunks, getVisibleChunks, generateChunk]);
 
     // Initialize the grid with initial chunks
     useEffect(() => {
