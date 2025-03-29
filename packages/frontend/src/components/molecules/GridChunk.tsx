@@ -1,8 +1,9 @@
 import React from 'react';
 
-import { GridCell } from './GridCell';
+import { usePreventDefaultAndStopPropagation } from '../../hooks';
+import { GridCell } from '../atoms';
 
-import type { Chunk } from '../hooks/usePhotoGrid';
+import type { Chunk } from '../../types/grid';
 
 interface GridChunkProps {
     chunk: Chunk;
@@ -15,12 +16,7 @@ export const GridChunk: React.FC<GridChunkProps> = ({
     cellSize,
     chunkSize,
 }) => {
-    // Prevent default behavior for drag events
-    const preventDragDefault = (e: React.DragEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    };
+    const preventDragDefault = usePreventDefaultAndStopPropagation();
 
     return (
         <div

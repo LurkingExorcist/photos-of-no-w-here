@@ -1,6 +1,6 @@
 /* Grid background pattern */
 .bg-grid {
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
   background-size: 50px 50px;
@@ -24,7 +24,7 @@
 }
 
 /* Remove default focus and touch highlight on interactive elements */
-button:focus, 
+button:focus,
 select:focus {
   outline: none;
 }

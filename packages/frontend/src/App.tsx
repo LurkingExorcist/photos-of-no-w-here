@@ -1,6 +1,6 @@
 import React from 'react';
 
-import PhotoGrid from './components/PhotoGrid';
+import { PhotoGrid } from './components/organisms/PhotoGrid';
 
 import './App.css';
 

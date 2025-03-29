@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer fringe layer with rotation -->
+    <circle cx="50" cy="50" r="48" fill="none" stroke="#E4A668" stroke-width="4" stroke-dasharray="2,3">
+        <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="60s"
+            repeatCount="indefinite" additive="sum" />
+    </circle>
+
+    <!-- Main fringe circle -->
+    <circle cx="50" cy="50" r="40" fill="#E4A668" />
+
+    <!-- Beaded border -->
+    <circle cx="50" cy="50" r="35" fill="none" stroke="#E8C5A8" stroke-width="6" stroke-dasharray="2,2">
+        <animateTransform
+            attributeName="transform"
+            type="rotate"
+            from="0 50 50"
+            to="-360 50 50"
+            dur="60s"
+            repeatCount="indefinite"
+            additive="sum"
+        />
+    </circle>
+
+    <!-- Inner mirror surface -->
+    <circle cx="50" cy="50" r="30" fill="#F5E6DD" />
+
+    <!-- Decorative pattern reflection (simplified) -->
+    <circle cx="50" cy="50" r="15" fill="none" stroke-width="2px" stroke="#E4A668">
+    </circle>
+    <line x1="35" y1="50" x2="35" y2="77" stroke-width="2px" stroke="#E4A668" />
+
+    <circle cx="50" cy="50" r="10" fill="none" stroke-width="2px" stroke="#E4A668">
+    </circle>
+    <line x1="40" y1="50" x2="40" y2="79" stroke-width="2px" stroke="#E4A668" />
+</svg>
