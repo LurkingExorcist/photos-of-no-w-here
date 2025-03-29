@@ -1,52 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import { GridCell } from '@/components';
-import { usePreventDefaultAndStopPropagation } from '@/hooks';
+import {
+    useIntersectionObserver,
+    usePreventDefaultAndStopPropagation,
+} from '@/hooks';
 import type { Chunk } from '@/types/grid';
 
 interface GridChunkProps {
     chunk: Chunk;
-    cellSize: number;
-    chunkSize: number;
 }
 
-export const GridChunk: React.FC<GridChunkProps> = ({
-    chunk,
-    cellSize,
-    chunkSize,
-}) => {
+export const GridChunk: React.FC<GridChunkProps> = ({ chunk }) => {
     const preventDragDefault = usePreventDefaultAndStopPropagation();
+    const [ref, isVisible] = useIntersectionObserver();
+    const [hasAppeared, setHasAppeared] = useState(false);
+
+    // Set hasAppeared to true once the chunk becomes visible
+    React.useEffect(() => {
+        if (isVisible && !hasAppeared) {
+            setHasAppeared(true);
+        }
+    }, [isVisible, hasAppeared]);
 
     return (
         <div
-            className="absolute"
+            ref={ref}
+            className={`absolute transition-opacity duration-500 ${
+                hasAppeared ? 'opacity-100' : 'opacity-0'
+            }
+                left-[calc(var(--chunk-x)_*_var(--chunk-size)_*_var(--cell-size))]
+                top-[calc(var(--chunk-y)_*_var(--chunk-size)_*_var(--cell-size))]
+                width-[calc(var(--chunk-size)_*_var(--cell-size))]
+                height-[calc(var(--chunk-size)_*_var(--cell-size))]
+            `}
             style={{
-                left: chunk.x * chunkSize * cellSize,
-                top: chunk.y * chunkSize * cellSize,
-                width: chunkSize * cellSize,
-                height: chunkSize * cellSize,
+                '--chunk-x': `${chunk.x}`,
+                '--chunk-y': `${chunk.y}`,
             }}
             draggable="false"
             onDragStart={preventDragDefault}
         >
             <div
-                className="grid"
-                style={{
-                    gridTemplateColumns: `repeat(${chunkSize}, ${cellSize}px)`,
-                    gridTemplateRows: `repeat(${chunkSize}, ${cellSize}px)`,
-                    width: '100%',
-                    height: '100%',
-                }}
+                className={`
+                    grid
+                    grid-cols-[repeat(var(--chunk-size),var(--cell-size))]
+                    grid-rows-[repeat(var(--chunk-size),var(--cell-size))]
+                    w-full h-full
+                `}
                 draggable="false"
                 onDragStart={preventDragDefault}
             >
                 {chunk.cells.map((row, y) =>
                     row.map((cell, x) => (
-                        <GridCell
-                            key={`${x}-${y}`}
-                            cell={cell}
-                            size={cellSize}
-                        />
+                        <GridCell key={`${x}-${y}`} cell={cell} />
                     ))
                 )}
             </div>

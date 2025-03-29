@@ -20,7 +20,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = () => {
     const { position, scale, updatePosition } = useGridState();
 
     // Get grid state and methods
-    const { chunks, gridRef, CHUNK_SIZE, CELL_SIZE } = usePhotoGrid({
+    const { chunks, gridRef, chunkSize, cellSize } = usePhotoGrid({
         position,
         scale,
     });
@@ -33,7 +33,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = () => {
 
     return (
         <div
-            className="relative w-full h-screen overflow-hidden bg-gray-900"
+            className="relative w-full h-screen overflow-hidden"
             onDragStart={preventDefault}
         >
             <div
@@ -43,10 +43,18 @@ export const PhotoGrid: React.FC<PhotoGridProps> = () => {
                 draggable="false"
             >
                 <div
-                    className="absolute top-1/2 left-1/2 origin-center will-change-transform"
+                    className={`absolute
+                    top-1/2 left-1/2
+                    origin-center will-change-transform
+                    translate-x-[calc(var(--position-x))] translate-y-[calc(var(--position-y))]
+                    scale-[var(--scale)]
+                    pointer-events-none`}
                     style={{
-                        transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
-                        pointerEvents: 'none',
+                        '--chunk-size': chunkSize.toString(),
+                        '--cell-size': `${cellSize}px`,
+                        '--position-x': `${position.x}px`,
+                        '--position-y': `${position.y}px`,
+                        '--scale': `${scale}`,
                     }}
                     onDragStart={preventDefault}
                     draggable="false"
@@ -55,8 +63,6 @@ export const PhotoGrid: React.FC<PhotoGridProps> = () => {
                         <GridChunk
                             key={`${chunk.x}-${chunk.y}`}
                             chunk={chunk}
-                            cellSize={CELL_SIZE}
-                            chunkSize={CHUNK_SIZE}
                         />
                     ))}
                 </div>

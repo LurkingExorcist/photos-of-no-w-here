@@ -73,7 +73,7 @@ export const generateGridCell = (
     lightnessGenerator: INoiseGenerator
 ): GridCellDatum => {
     // Calculate hue based on position
-    const hue = (globalX * (48 / 360) + globalY * (95 / 360)) % 1;
+    const hue = (globalX * (95 / 360) + globalY * (95 / 360)) % 1;
 
     // Calculate saturation using Perlin noise
     const saturationNoiseValue = saturationGenerator.noise(

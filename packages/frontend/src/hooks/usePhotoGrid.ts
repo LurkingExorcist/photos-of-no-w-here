@@ -3,10 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import type { Chunk, GridPosition } from '@/types/grid';
 
 import { useVisibleChunks } from './chunks/useVisibleChunks';
-
+import { useIsMobile } from './useIsMobile';
 // Constants for grid configuration
-const CHUNK_SIZE = 10;
-const CELL_SIZE = 100;
+const CHUNK_SIZE = 8;
+const CHUNK_SIZE_MOBILE = 4;
+const CELL_SIZE = 256;
+const CELL_SIZE_MOBILE = 128;
 
 /**
  * Props for the usePhotoGrid hook
@@ -29,9 +31,9 @@ interface PhotoGridResult {
     /** Reference to the grid container element */
     gridRef: React.RefObject<HTMLDivElement>;
     /** Size of each chunk in cells */
-    CHUNK_SIZE: number;
+    chunkSize: number;
     /** Size of each cell in pixels */
-    CELL_SIZE: number;
+    cellSize: number;
 }
 
 /**
@@ -49,16 +51,20 @@ export const usePhotoGrid = ({
     position,
     scale,
 }: UsePhotoGridProps): PhotoGridResult => {
+    const isMobile = useIsMobile();
     const [loading, setLoading] = useState(true);
     const gridRef = useRef<HTMLDivElement>(null);
+
+    const chunkSize = isMobile ? CHUNK_SIZE_MOBILE : CHUNK_SIZE;
+    const cellSize = isMobile ? CELL_SIZE_MOBILE : CELL_SIZE;
 
     // Get visible chunks based on current position and scale
     const { chunks } = useVisibleChunks({
         position,
         scale,
         gridRef,
-        chunkSize: CHUNK_SIZE,
-        cellSize: CELL_SIZE,
+        chunkSize,
+        cellSize,
     });
 
     const isChunksFilled = chunks.length > 0;
@@ -74,7 +80,7 @@ export const usePhotoGrid = ({
         chunks,
         loading,
         gridRef,
-        CHUNK_SIZE,
-        CELL_SIZE,
+        chunkSize,
+        cellSize,
     };
 };

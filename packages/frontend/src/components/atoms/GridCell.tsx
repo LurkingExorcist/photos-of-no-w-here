@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
     useIntersectionObserver,
@@ -8,25 +8,20 @@ import type { GridCellDatum } from '@/types/grid';
 
 interface GridCellProps {
     cell: GridCellDatum;
-    size: number;
 }
 
-export const GridCell: React.FC<GridCellProps> = ({ cell, size }) => {
-    const [ref, isVisible] = useIntersectionObserver({
-        rootMargin: '50px',
-        threshold: 0.1,
-    });
+export const GridCell: React.FC<GridCellProps> = ({ cell }) => {
+    const [ref, isVisible] = useIntersectionObserver();
 
+    const [imageLoaded, setImageLoaded] = useState(false);
     const preventDragDefault = usePreventDefaultAndStopPropagation();
 
     return (
         <div
             ref={ref}
-            className="relative grid-cell"
+            className="relative grid-cell w-[calc(var(--cell-size)_*_1px)] h-[calc(var(--cell-size)_*_1px)] bg-[var(--cell-color)]"
             style={{
-                width: size,
-                height: size,
-                backgroundColor: `#${cell.color}`, // Show color as background while loading
+                '--cell-color': `#${cell.color}`,
             }}
             draggable="false"
             onDragStart={preventDragDefault}
@@ -34,9 +29,12 @@ export const GridCell: React.FC<GridCellProps> = ({ cell, size }) => {
             {isVisible && (
                 <img
                     src={`/api/photo/${cell.color}`}
-                    className="w-full h-full object-cover [&[data-broken=true]]:hidden"
+                    className={`w-full h-full object-cover [&[data-broken=true]]:hidden transition-opacity duration-300 ${
+                        imageLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
                     draggable="false"
                     onDragStart={preventDragDefault}
+                    onLoad={() => setImageLoaded(true)}
                     onError={(event) => {
                         event.currentTarget.setAttribute('data-broken', 'true');
                     }}

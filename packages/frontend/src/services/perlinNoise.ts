@@ -1,3 +1,5 @@
+import type { INoiseGenerator } from '@/types/noise';
+
 /**
  * Perlin Noise Generator
  *
@@ -12,7 +14,7 @@
  * const noise = new PerlinNoise(42); // Create with seed 42
  * const value = noise.noise(x, y); // Get 2D noise value at coordinates (x,y)
  */
-export class PerlinNoise {
+export class PerlinNoise implements INoiseGenerator {
     // The original permutation table (size 256)
     private readonly permutation: number[];
     // Doubled permutation table (size 512) to avoid overflow issues
