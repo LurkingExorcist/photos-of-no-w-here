@@ -1,13 +1,7 @@
 import chroma from 'chroma-js';
 
-import type { Chunk, GridCellDatum, GridPosition } from '../types/grid';
-
-/**
- * Interface for noise generators that provide a noise function
- */
-interface NoiseGenerator {
-    noise(x: number, y: number, z?: number): number;
-}
+import type { Chunk, GridCellDatum, GridPosition } from '@/types/grid';
+import type { INoiseGenerator } from '@/types/noise';
 
 /**
  * Represents grid coordinates for a chunk
@@ -75,8 +69,8 @@ export const getVisibleChunkCoordinates = (
 export const generateGridCell = (
     globalX: number,
     globalY: number,
-    saturationGenerator: NoiseGenerator,
-    lightnessGenerator: NoiseGenerator
+    saturationGenerator: INoiseGenerator,
+    lightnessGenerator: INoiseGenerator
 ): GridCellDatum => {
     // Calculate hue based on position
     const hue = (globalX * (48 / 360) + globalY * (95 / 360)) % 1;

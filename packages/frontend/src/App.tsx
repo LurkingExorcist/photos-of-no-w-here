@@ -1,8 +1,7 @@
 import React from 'react';
 
-import { PhotoGrid } from './components/organisms/PhotoGrid';
-
 import './App.css';
+import { PhotoGrid } from '@/components';
 
 const App: React.FC = () => {
     return (

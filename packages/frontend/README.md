@@ -16,7 +16,6 @@ A React application that implements an infinite, color-based photo grid with pan
 
 - React with TypeScript
 - TailwindCSS for styling
-- @use-gesture/react for gesture handling
 - chroma-js for color manipulation
 - Modern React hooks for state management
 

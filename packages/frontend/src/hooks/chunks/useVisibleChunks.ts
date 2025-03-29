@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { Chunk, GridPosition } from '@/types/grid';
 import {
     generateInitialChunks,
     getVisibleChunkCoordinates,
-} from '../../utils/chunk';
+} from '@/utils/chunk';
 
 import { useChunkGeneration } from './useChunkGeneration';
-
-import type { Chunk, GridPosition } from '../../types/grid';
 
 /**
  * Props for the useVisibleChunks hook

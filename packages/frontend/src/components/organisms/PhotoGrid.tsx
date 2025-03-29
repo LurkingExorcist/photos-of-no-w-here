@@ -1,11 +1,12 @@
 import React from 'react';
 
+import { GridChunk } from '@/components';
 import {
+    useGridIntegrations,
     useGridState,
     usePhotoGrid,
     usePreventDefaultAndStopPropagation,
-} from '../../hooks';
-import { GridChunk } from '../molecules';
+} from '@/hooks';
 
 // const MAX_ZOOM = 5;
 // const MIN_ZOOM = 0.5;
@@ -16,12 +17,18 @@ export const PhotoGrid: React.FC<PhotoGridProps> = () => {
     const preventDefault = usePreventDefaultAndStopPropagation();
 
     // Get grid state (position and scale)
-    const { x, y, scale: currentScale } = useGridState();
+    const { position, scale, updatePosition } = useGridState();
 
     // Get grid state and methods
     const { chunks, gridRef, CHUNK_SIZE, CELL_SIZE } = usePhotoGrid({
-        position: { x, y },
-        scale: currentScale,
+        position,
+        scale,
+    });
+
+    useGridIntegrations({
+        gridRef,
+        position,
+        updatePosition,
     });
 
     return (
@@ -38,7 +45,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = () => {
                 <div
                     className="absolute top-1/2 left-1/2 origin-center will-change-transform"
                     style={{
-                        transform: `translate3d(${x}px, ${y}px, 0) scale(${currentScale})`,
+                        transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${scale})`,
                         pointerEvents: 'none',
                     }}
                     onDragStart={preventDefault}

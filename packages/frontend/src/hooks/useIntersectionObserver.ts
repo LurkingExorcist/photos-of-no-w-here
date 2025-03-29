@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { createIntersectionObserver } from '../utils/dom';
+import { createIntersectionObserver } from '@/utils/dom';
 
 /**
  * Options for the intersection observer

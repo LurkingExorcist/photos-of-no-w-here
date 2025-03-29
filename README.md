@@ -88,7 +88,6 @@ http://localhost:3333/api
 - **Frontend**: 
   - React + TypeScript
   - TailwindCSS
-  - @use-gesture/react for pan/zoom interactions
   - chroma-js for color manipulation
 
 - **Backend**: 

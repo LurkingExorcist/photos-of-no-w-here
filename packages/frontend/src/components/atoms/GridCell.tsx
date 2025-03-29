@@ -3,9 +3,8 @@ import React from 'react';
 import {
     useIntersectionObserver,
     usePreventDefaultAndStopPropagation,
-} from '../../hooks';
-
-import type { GridCellDatum } from '../../types/grid';
+} from '@/hooks';
+import type { GridCellDatum } from '@/types/grid';
 
 interface GridCellProps {
     cell: GridCellDatum;

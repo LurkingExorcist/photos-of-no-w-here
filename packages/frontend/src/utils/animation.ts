@@ -2,7 +2,7 @@
  * Animation utility functions for the grid system
  */
 
-import type { GridPosition } from '../types/grid';
+import type { GridPosition } from '@/types/grid';
 
 /**
  * Interface for animation target values

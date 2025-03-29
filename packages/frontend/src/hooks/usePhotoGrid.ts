@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { useVisibleChunks } from './grid/useVisibleChunks';
+import type { Chunk, GridPosition } from '@/types/grid';
 
-import type { Chunk, GridPosition } from '../types/grid';
+import { useVisibleChunks } from './chunks/useVisibleChunks';
 
 // Constants for grid configuration
 const CHUNK_SIZE = 10;

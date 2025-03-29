@@ -1,16 +1,9 @@
 import { useCallback, useRef } from 'react';
 
-import { generateGridCell } from '../../utils/chunk';
-import { PerlinNoise } from '../../utils/perlinNoise';
-
-import type { Chunk, GridCellDatum } from '../../types/grid';
-
-/**
- * Interface for noise generators that provide a noise function
- */
-interface NoiseGenerator {
-    noise(x: number, y: number, z?: number): number;
-}
+import type { Chunk, GridCellDatum } from '@/types/grid';
+import type { INoiseGenerator } from '@/types/noise';
+import { generateGridCell } from '@/utils/chunk';
+import { PerlinNoise } from '@/utils/perlinNoise';
 
 /**
  * Props for the useChunkGeneration hook
@@ -42,10 +35,10 @@ export const useChunkGeneration = ({
     chunkSize,
 }: UseChunkGenerationProps): ChunkGenerationResult => {
     // Initialize Perlin noise generators with random seeds
-    const saturationNoise = useRef<NoiseGenerator>(
+    const saturationNoise = useRef<INoiseGenerator>(
         new PerlinNoise(Math.random() * 1000)
     );
-    const lightnessNoise = useRef<NoiseGenerator>(
+    const lightnessNoise = useRef<INoiseGenerator>(
         new PerlinNoise(Math.random() * 1000)
     );
 
