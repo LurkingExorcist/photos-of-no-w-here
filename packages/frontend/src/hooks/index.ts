@@ -3,4 +3,4 @@ export * from './useIntersectionObserver';
 export * from './usePhotoGrid';
 export * from './useGridState';
 export * from './usePreventDefaultAndStopPropagation';
-export * from './useGridIntegrations';
+export * from './useGridInteractions';

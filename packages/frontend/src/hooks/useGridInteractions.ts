@@ -2,20 +2,20 @@ import { useCallback, useEffect, useState } from 'react';
 
 import type { GridPosition } from '@/types/grid';
 
-interface UseGridIntegrationsProps {
+interface UseGridInteractionsProps {
     position: GridPosition;
-    updatePosition: (position: GridPosition) => void;
     gridRef: React.RefObject<HTMLDivElement>;
+    updatePosition: (position: GridPosition) => void;
 }
 
 /**
  * Hook to handle grid interactions like dragging with mouse and touch
  */
-export const useGridIntegrations = ({
+export const useGridInteractions = ({
     position,
     updatePosition,
     gridRef,
-}: UseGridIntegrationsProps) => {
+}: UseGridInteractionsProps) => {
     // Track if user is currently dragging
     const [isDragging, setIsDragging] = useState(false);
 

@@ -2,14 +2,11 @@ import React from 'react';
 
 import { GridChunk } from '@/components';
 import {
-    useGridIntegrations,
+    useGridInteractions,
     useGridState,
     usePhotoGrid,
     usePreventDefaultAndStopPropagation,
 } from '@/hooks';
-
-// const MAX_ZOOM = 5;
-// const MIN_ZOOM = 0.5;
 
 interface PhotoGridProps {}
 
@@ -25,7 +22,7 @@ export const PhotoGrid: React.FC<PhotoGridProps> = () => {
         scale,
     });
 
-    useGridIntegrations({
+    useGridInteractions({
         gridRef,
         position,
         updatePosition,
