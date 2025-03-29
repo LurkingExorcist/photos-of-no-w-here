@@ -1,32 +1,31 @@
 # Photos of no-w-here
 
-> "In photography, there is a reality so subtle that it becomes more real than reality." 
-> — Alfred Stieglitz
+> "What we see exists only in relation to what we don't see."
 
-A minimalist photo management platform built with modern TypeScript. Where pixels meet poetry.
+A minimalist photo management platform where meaning emerges from absence.
 
-## Project Overview
+## Vessel & Void
 
-Photos of no-w-here is a specialized photo management platform that organizes and displays photos based on their color characteristics. The platform processes Instagram data archives, analyzes photos based on their colors, and provides an intuitive, infinite grid interface for exploring your visual memories through the lens of color similarity.
+Photos of no-w-here organizes visual memories through the interplay of color and space. Images exist in relation to one another, their significance arising not from inherent properties but from interconnection.
+
+The platform processes Instagram data archives, analyzes photos based on their colors, and places them in an infinite grid where meaning emerges from the spaces between.
 
 ## Architecture
 
-A monorepo structure housing two main components:
+A monorepo structure housing two complementary components:
 
-- `frontend/`: A React application that renders an infinite, color-based photo grid with panning, zooming, and smart photo placement based on color similarity.
-- `backend/`: A NestJS service that processes Instagram archives, performs color-based photo analysis, and serves photos through a RESTful API.
+- `frontend/`: A React application rendering an infinite photo grid with intuitive navigation
+- `backend/`: A NestJS service processing Instagram archives and performing color analysis
 
-## Requirements
+## Prerequisites
 
 - Node.js ≥ v18
 - Docker & Docker Compose
 - npm or yarn
 
-## Quick Start
+## Getting Started
 
 ### Using Scripts
-
-The project provides convenient scripts for both development and production environments:
 
 ```bash
 # Development environment
@@ -54,41 +53,41 @@ npm run dev
 
 ### Available Commands
 
-- `npm run dev` — Start development environment
+- `npm run dev` — Start development
 - `npm run build` — Build for production
-- `npm run start` — Run in production mode
-- `npm run lint` — Static code analysis
-- `npm run lint:fix` — Auto-fix linting issues
+- `npm run start` — Run in production
+- `npm run lint` — Analyze code
+- `npm run lint:fix` — Fix code issues
 - `npm run format` — Format codebase
 
 ### Containerization
 
-Docker configurations are available for both environments:
+Docker configurations:
 
 - `docker-compose.yml` — Production environment
 - `docker-compose.dev.yml` — Development environment
 
 ## API Documentation
 
-After starting the containers, the Swagger documentation is available at:
+After starting the containers, documentation is available at:
 ```
 http://localhost:3333/api
 ```
 
-## Key Features
+## Core Concepts
 
-- **Instagram Archive Processing**: Upload and process your Instagram data exports
-- **Color-Based Photo Analysis**: Photos are analyzed for their color characteristics
-- **Infinite Pan and Zoom**: Navigate through your photo collection with intuitive controls
-- **Color-Based Placement**: Similar colors are positioned closer together in the grid
-- **Dynamic Loading**: Photos load as you explore, with color placeholders shown during loading
+- **Archive Processing**: Transform your Instagram data into insight
+- **Color Analysis**: Reveal photos' fundamental qualities through color
+- **Infinite Navigation**: Explore without boundaries
+- **Relational Placement**: Photos positioned through their relationships
+- **Dynamic Presence**: Images appear when needed, fade when not
 
-## Tech Stack
+## Technology
 
 - **Frontend**: 
   - React + TypeScript
   - TailwindCSS
-  - chroma-js for color manipulation
+  - chroma-js
 
 - **Backend**: 
   - NestJS + TypeScript
@@ -108,7 +107,3 @@ http://localhost:3333/api
 3. Commit your changes (`git commit -m 'feat: your feature description'`)
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Open a Pull Request
-
-## License
-
-MIT License

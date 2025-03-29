@@ -1,57 +1,56 @@
 # Backend Service
 
-> "The best way to predict the future is to implement it."
-> — Alan Kay
+> "The most profound technologies disappear. They weave themselves into the fabric of everyday life until they are indistinguishable from it."
 
-A NestJS service that processes and serves photos based on their color characteristics.
+A service operating in the background, processing the transient nature of digital memories.
 
-## Overview
+## Core Functions
 
-The backend service handles:
-- Instagram archive processing and extraction
-- Color-based photo analysis and classification
-- RESTful API endpoints for photo retrieval
-- Color similarity calculation for the frontend grid
-- Efficient cache management for performance optimization
+This backend handles:
+- Extracting meaning from Instagram archives
+- Analyzing the color essence of images
+- Providing endpoints that manifest data on request
+- Calculating relationships between visual elements
+- Storing information with awareness of impermanence
 
-## Key Features
+## Primary Features
 
-- **Instagram Data Processing**: Extract and process photos from Instagram data exports
-- **Color Analysis**: Analyze photos for their predominant colors and color characteristics
-- **Color-Based Retrieval**: Find and return photos based on color similarity
-- **Caching**: Efficient caching system for optimized performance
-- **Comprehensive API**: Well-documented endpoints with Swagger integration
+- **Archive Processing**: Convert personal data into universal form
+- **Color Analysis**: Perceive the essential qualities of each image
+- **Color-Based Retrieval**: Find photos by their fundamental properties
+- **Efficient Caching**: Storage that acknowledges transience
+- **API Documentation**: Clear pathways through complexity
 
-## API Documentation
+## Documentation
 
-Once the service is running, the Swagger documentation is available at:
+API documentation is available at:
 ```
 http://localhost:3333/api
 ```
 
 ## Endpoints
 
-### Photo Management
+### Photo Retrieval
 
 - `GET /photo/:color`
-  - Retrieve a photo by its color
+  - Retrieve a photo by its color value
   - Parameters:
     - `color`: Hex color value without # (e.g., "FF0000" for red)
-  - Returns: Photo file
-  - Error: 404 if no photo matches the color
+  - Returns: Photo data
+  - Error: 404 when no matching photo exists
 
-### Data Management
+### Data Processing
 
 - `POST /data/upload`
-  - Upload Instagram data archive
+  - Process Instagram archive
   - Content-Type: multipart/form-data
   - Parameters:
     - `archive`: ZIP file containing Instagram data
   - Returns: Processing result
-  - Error: 400 if file is invalid or processing fails
+  - Error: 400 if the file format is invalid
 
 - `GET /data/media`
-  - Retrieve media items with filtering and pagination
+  - Retrieve media items with filtering
   - Query Parameters:
     - `page`: Page number (1-based, default: 1)
     - `limit`: Items per page (default: 10)
@@ -74,25 +73,25 @@ http://localhost:3333/api
 
 - `GET /cache/stats`
   - Get current cache statistics
-  - Returns: Cache statistics information
+  - Returns: Cache metrics
 
 - `POST /cache/verify`
-  - Verify and update the cache for all processed media items
+  - Verify cache integrity
   - Returns: Verification result
 
 - `POST /cache/clear`
-  - Clear the cache for specified type
+  - Clear specified cache
   - Query Parameters:
     - `type`: Cache type to clear (optional)
       - `all`: Clear all caches
       - `color`: Clear color cache
       - `media`: Clear media cache
-  - Returns: Clearing result
+  - Returns: Operation result
 
 - `GET /cache/slice`
-  - Get a slice of cache entries for a specific type
+  - Get a subset of cache entries
   - Query Parameters:
-    - `type`: Cache type to get entries from (required)
+    - `type`: Cache type to query (required)
       - `color`: Color cache entries
       - `media`: Media cache entries
     - `start`: Starting index (0-based, optional)
@@ -112,7 +111,7 @@ http://localhost:3333/api
 npm install
 ```
 
-### Running the Service
+### Running
 
 ```bash
 # Development mode
@@ -138,17 +137,13 @@ npm run test:e2e
 npm run test:cov
 ```
 
-## Project Structure
+## Structure
 
 ```
 src/
 ├── controllers/    # API endpoints
-├── services/       # Business logic
-├── interfaces/     # TypeScript interfaces
-├── dto/           # Data transfer objects
-└── main.ts        # Application entry point
+├── services/       # Core logic
+├── interfaces/     # Type definitions
+├── dto/            # Data transfer objects
+└── main.ts         # Entry point
 ```
-
-## License
-
-MIT License
