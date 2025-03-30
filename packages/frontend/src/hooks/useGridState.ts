@@ -11,6 +11,9 @@ export const useGridState = () => {
     const [position, updatePosition] = useState<GridPosition>({ x: 0, y: 0 });
     const [scale, updateScale] = useState(1);
 
+    // State for photo selection
+    const [isPhotoSelected, updateIsPhotoSelected] = useState(false);
+
     /**
      * Reset the view to default position and scale
      */
@@ -20,8 +23,10 @@ export const useGridState = () => {
     };
 
     return {
+        isPhotoSelected,
         position,
         scale,
+        updateIsPhotoSelected,
         updatePosition,
         updateScale,
         resetView,

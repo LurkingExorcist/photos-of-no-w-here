@@ -1,8 +1,7 @@
-import { useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 
 import { DistributedNoise, PerlinNoise } from '@/services';
 import type { Chunk, GridCellDatum } from '@/types/grid';
-import type { INoiseGenerator } from '@/types/noise';
 import { generateGridCell } from '@/utils/chunk';
 
 /**
@@ -23,6 +22,10 @@ interface ChunkGenerationResult {
     createChunk: (x: number, y: number) => Chunk;
 }
 
+// Initialize Perlin noise generators with random seeds
+const saturationNoise = new DistributedNoise(Math.random() * 1000);
+const lightnessNoise = new PerlinNoise(Math.random() * 1000);
+
 /**
  * Hook for generating colorful grid chunks using Perlin noise
  *
@@ -34,14 +37,6 @@ interface ChunkGenerationResult {
 export const useChunkGeneration = ({
     chunkSize,
 }: UseChunkGenerationProps): ChunkGenerationResult => {
-    // Initialize Perlin noise generators with random seeds
-    const saturationNoise = useRef<INoiseGenerator>(
-        new DistributedNoise(Math.random() * 1000)
-    );
-    const lightnessNoise = useRef<INoiseGenerator>(
-        new PerlinNoise(Math.random() * 1000)
-    );
-
     /**
      * Generates a full chunk of grid cells
      */
@@ -60,8 +55,8 @@ export const useChunkGeneration = ({
                     newChunk[y][x] = generateGridCell(
                         globalX,
                         globalY,
-                        saturationNoise.current,
-                        lightnessNoise.current
+                        saturationNoise,
+                        lightnessNoise
                     );
                 }
             }

@@ -9,11 +9,17 @@ import type { Chunk } from '@/types/grid';
 
 interface GridChunkProps {
     chunk: Chunk;
+    bindCellElement: () => React.HTMLAttributes<HTMLButtonElement>;
 }
 
-export const GridChunk: React.FC<GridChunkProps> = ({ chunk }) => {
+export const GridChunk: React.FC<GridChunkProps> = ({
+    chunk,
+    bindCellElement,
+}) => {
     const preventDragDefault = usePreventDefaultAndStopPropagation();
-    const [ref, isVisible] = useIntersectionObserver();
+    const [ref, isVisible] = useIntersectionObserver({
+        rootMargin: '256px',
+    });
     const [hasAppeared, setHasAppeared] = useState(false);
 
     // Set hasAppeared to true once the chunk becomes visible
@@ -53,7 +59,11 @@ export const GridChunk: React.FC<GridChunkProps> = ({ chunk }) => {
             >
                 {chunk.cells.map((row, y) =>
                     row.map((cell, x) => (
-                        <GridCell key={`${x}-${y}`} cell={cell} />
+                        <GridCell
+                            key={`${x}-${y}`}
+                            cell={cell}
+                            bindCellElement={bindCellElement}
+                        />
                     ))
                 )}
             </div>

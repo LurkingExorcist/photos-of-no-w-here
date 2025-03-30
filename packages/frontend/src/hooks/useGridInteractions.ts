@@ -3,19 +3,25 @@ import { useCallback, useEffect, useState } from 'react';
 import type { GridPosition } from '@/types/grid';
 
 interface UseGridInteractionsProps {
-    position: GridPosition;
     gridRef: React.RefObject<HTMLDivElement>;
+    isPhotoSelected: boolean;
+    position: GridPosition;
     updatePosition: (position: GridPosition) => void;
+}
+
+interface UseGridInteractionsReturn {
+    isDragging: boolean;
 }
 
 /**
  * Hook to handle grid interactions like dragging with mouse and touch
  */
 export const useGridInteractions = ({
+    gridRef,
+    isPhotoSelected,
     position,
     updatePosition,
-    gridRef,
-}: UseGridInteractionsProps) => {
+}: UseGridInteractionsProps): UseGridInteractionsReturn => {
     // Track if user is currently dragging
     const [isDragging, setIsDragging] = useState(false);
 
@@ -93,17 +99,21 @@ export const useGridInteractions = ({
 
     // Add and remove event listeners
     useEffect(() => {
-        // All event listeners attached to document for consistency
-        document.addEventListener('mousedown', handleDragStart);
-        document.addEventListener('mousemove', handleDrag);
-        document.addEventListener('mouseup', handleDragEnd);
-        document.addEventListener('mouseleave', handleDragEnd);
+        if (!isPhotoSelected) {
+            // All event listeners attached to document for consistency
+            document.addEventListener('mousedown', handleDragStart);
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', handleDragEnd);
+            document.addEventListener('mouseleave', handleDragEnd);
 
-        // Touch events
-        document.addEventListener('touchstart', handleDragStart);
-        document.addEventListener('touchmove', handleDrag, { passive: false });
-        document.addEventListener('touchend', handleDragEnd);
-        document.addEventListener('touchcancel', handleDragEnd);
+            // Touch events
+            document.addEventListener('touchstart', handleDragStart);
+            document.addEventListener('touchmove', handleDrag, {
+                passive: false,
+            });
+            document.addEventListener('touchend', handleDragEnd);
+            document.addEventListener('touchcancel', handleDragEnd);
+        }
 
         // Prevent default touch behavior to avoid scrolling while dragging
         const preventDefaultTouchMove = (e: TouchEvent) => {
@@ -130,7 +140,13 @@ export const useGridInteractions = ({
 
             document.removeEventListener('touchmove', preventDefaultTouchMove);
         };
-    }, [handleDragStart, handleDrag, handleDragEnd, isDragging]);
+    }, [
+        handleDragStart,
+        handleDrag,
+        handleDragEnd,
+        isPhotoSelected,
+        isDragging,
+    ]);
 
     // Update cursor style based on dragging state
     useEffect(() => {

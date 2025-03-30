@@ -8,16 +8,22 @@ import type { GridCellDatum } from '@/types/grid';
 
 interface GridCellProps {
     cell: GridCellDatum;
+    bindCellElement: () => React.HTMLAttributes<HTMLButtonElement>;
 }
 
-export const GridCell: React.FC<GridCellProps> = ({ cell }) => {
-    const [ref, isVisible] = useIntersectionObserver();
+export const GridCell: React.FC<GridCellProps> = ({
+    cell,
+    bindCellElement,
+}) => {
+    const [ref, isVisible] = useIntersectionObserver<HTMLButtonElement>({
+        rootMargin: '256px',
+    });
 
     const [imageLoaded, setImageLoaded] = useState(false);
     const preventDragDefault = usePreventDefaultAndStopPropagation();
 
     return (
-        <div
+        <button
             ref={ref}
             className="relative grid-cell w-[calc(var(--cell-size)_*_1px)] h-[calc(var(--cell-size)_*_1px)] bg-[var(--cell-color)]"
             style={{
@@ -25,6 +31,9 @@ export const GridCell: React.FC<GridCellProps> = ({ cell }) => {
             }}
             draggable="false"
             onDragStart={preventDragDefault}
+            type="button"
+            aria-label={`Photo ${cell.color}`}
+            {...bindCellElement()}
         >
             {isVisible && (
                 <img
@@ -40,6 +49,6 @@ export const GridCell: React.FC<GridCellProps> = ({ cell }) => {
                     }}
                 />
             )}
-        </div>
+        </button>
     );
 };

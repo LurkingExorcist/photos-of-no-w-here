@@ -5,5 +5,6 @@ declare module 'react' {
         '--position-x'?: string;
         '--position-y'?: string;
         '--scale'?: string;
+        '--translate-transition-duration'?: string;
     }
 }
