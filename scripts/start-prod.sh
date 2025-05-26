@@ -58,7 +58,7 @@ backup_volumes() {
 # Function to clean up old containers and volumes
 cleanup() {
     echo -e "${YELLOW}Cleaning up old containers...${NC}"
-    docker-compose down --remove-orphans
+    docker compose down --remove-orphans
 }
 
 # Function to check container health
@@ -78,7 +78,7 @@ check_health() {
     done
     
     echo -e "${RED}Error: Containers failed to become healthy${NC}"
-    docker-compose logs
+    docker compose logs
     exit 1
 }
 
@@ -102,17 +102,17 @@ main() {
     
     # Pull latest images
     echo -e "${GREEN}Pulling latest images...${NC}"
-    docker-compose pull
+    docker compose pull
     
     # Build and start containers in detached mode
     echo -e "${GREEN}Building and starting containers...${NC}"
-    docker-compose up -d --build
+    docker compose up -d --build
     
     # Check container health
     check_health
     
     echo -e "${GREEN}Production environment is up and running!${NC}"
-    echo -e "${GREEN}To view logs, run: docker-compose logs -f${NC}"
+    echo -e "${GREEN}To view logs, run: docker compose logs -f${NC}"
 }
 
 # Execute main function

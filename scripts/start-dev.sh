@@ -29,7 +29,7 @@ check_files() {
 # Function to clean up old containers and volumes
 cleanup() {
     echo -e "${YELLOW}Cleaning up old development containers...${NC}"
-    docker-compose -f docker-compose.dev.yml down --remove-orphans
+    docker compose -f docker-compose.dev.yml down --remove-orphans
 }
 
 # Main execution
@@ -48,11 +48,11 @@ main() {
     
     # Pull latest images
     echo -e "${GREEN}Pulling latest images...${NC}"
-    docker-compose -f docker-compose.dev.yml pull
+    docker compose -f docker-compose.dev.yml pull
     
     # Build and start containers
     echo -e "${GREEN}Building and starting containers...${NC}"
-    docker-compose -f docker-compose.dev.yml up --build
+    docker compose -f docker-compose.dev.yml up --build
 }
 
 # Execute main function
