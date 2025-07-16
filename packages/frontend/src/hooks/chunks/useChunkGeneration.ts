@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 
-import { DistributedNoise, PerlinNoise } from '@/services';
+import { RandomNoise, PerlinNoise } from '@/services';
 import type { Chunk, GridCellDatum } from '@/types/grid';
 import { generateGridCell } from '@/utils/chunk';
 
@@ -23,7 +23,7 @@ interface ChunkGenerationResult {
 }
 
 // Initialize Perlin noise generators with random seeds
-const saturationNoise = new DistributedNoise(Math.random() * 1000);
+const saturationNoise = new RandomNoise();
 const lightnessNoise = new PerlinNoise(Math.random() * 1000);
 
 /**

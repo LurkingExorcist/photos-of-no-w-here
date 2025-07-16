@@ -76,11 +76,11 @@ export const generateGridCell = (
     const hue = (globalX * (95 / 360) + globalY * (95 / 360)) % 1;
 
     // Calculate saturation using Perlin noise
-    // const saturationNoiseValue = saturationGenerator.noise(
-    //     globalX * 0.1,
-    //     globalY * 0.1
-    // );
-    const saturation = Math.pow(Math.random() * 0.5, 2); // Normalize to 0-1
+    const saturationNoiseValue = saturationGenerator.noise(
+        globalX * 0.1,
+        globalY * 0.1
+    );
+    const saturation = (saturationNoiseValue + 1) / 2; // Normalize to 0-1
 
     // Calculate lightness using Perlin noise
     const lightnessNoiseValue = lightnessGenerator.noise(
@@ -97,6 +97,10 @@ export const generateGridCell = (
 
     return {
         color,
+        saturation,
+        saturationNoiseValue: saturationNoiseValue.toString(),
+        lightness,
+        lightnessNoiseValue: lightnessNoiseValue.toString(),
         photoUrl: null,
     };
 };

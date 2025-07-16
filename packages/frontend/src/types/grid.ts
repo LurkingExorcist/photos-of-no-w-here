@@ -1,5 +1,9 @@
 export interface GridCellDatum {
     color: string;
+    saturation: number;
+    saturationNoiseValue: string;
+    lightness: number;
+    lightnessNoiseValue: string;
     photoUrl: string | null;
 }
 

@@ -6,7 +6,7 @@ const { execSync } = require('child_process');
 
 // Constants
 const POSTS_JSON_PATH =
-    '/app/packages/backend/instagram_data/your_instagram_activity/content/posts_1.json';
+    '/app/packages/backend/instagram_data/your_instagram_activity/media/posts_1.json';
 const DUMMY_POSTS_TS_PATH = 'packages/backend/mock/data/dummyPosts.ts';
 const DUMMY_POSTS_MEDIA_DIR = 'packages/backend/mock/data/dummy_posts';
 const CONTAINER_NAME = 'photos-of-no-w-here_backend_1';

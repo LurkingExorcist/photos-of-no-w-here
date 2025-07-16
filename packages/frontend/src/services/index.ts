@@ -1,2 +1,2 @@
-export * from './distributedNoise';
+export * from './randomNoise';
 export * from './perlinNoise';
