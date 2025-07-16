@@ -98,7 +98,7 @@ export class DataProcessingController {
             },
         },
     })
-    public async loadMedia(
+    public async queryMedia(
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
         @Query('startDate') startDate?: number,
@@ -106,7 +106,7 @@ export class DataProcessingController {
         @Query('title') title?: string,
         @Query('uri') uri?: string
     ): Promise<PaginatedResponse<Media>> {
-        return this.dataProcessingService.loadMedia({
+        return this.dataProcessingService.queryMedia({
             page,
             limit,
             startDate,

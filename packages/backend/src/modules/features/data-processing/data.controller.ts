@@ -118,7 +118,7 @@ export class DataController {
             },
         },
     })
-    public async loadMedia(
+    public async queryMedia(
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
         @Query('startDate') startDate?: number,
@@ -126,7 +126,7 @@ export class DataController {
         @Query('title') title?: string,
         @Query('uri') uri?: string
     ): Promise<PaginatedResponse<Media>> {
-        return this.dataService.loadMedia({
+        return this.dataService.queryMedia({
             page,
             limit,
             startDate,
