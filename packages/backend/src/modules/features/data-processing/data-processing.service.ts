@@ -1,23 +1,26 @@
+import os from 'os';
 import fs from 'fs';
 import afs from 'fs/promises';
 import path from 'path';
+import { join } from 'path';
+import { Worker } from 'worker_threads';
 
 import { Injectable, Logger } from '@nestjs/common';
 import decompress from 'decompress';
-import { isNil, negate } from 'lodash';
+import { isNil, negate, sortBy } from 'lodash';
 import sharp from 'sharp';
+import { getAverageColor } from 'fast-average-color-node';
 
-import { CacheService } from '../cache/cache.service';
-import { MediaColorService } from '../media-color/media-color.service';
+import { CacheService } from '@/modules/shared/cache/cache.service';
+import { ConfigService } from '@/modules/shared/config/config.service';
 
-import {
-    INSTAGRAM_DATA_PATH,
-    POSTS_CONFIG_PATH,
-    TEMP_UPLOAD_PATH,
-} from './data.constants';
-import { IReadableFile, Media, Post } from './data.types';
+import { MediaColorProcessorData } from './color-processor/color-processor.types';
+import { rgbToHsl } from './color-processor/color-processor.utils';
+import { HSLColor, HexColor, RGBAColor } from './data-processing.types';
+import { IReadableFile, Media, Post } from './data-processing.types';
+import { INSTAGRAM_DATA_PATH, POSTS_CONFIG_PATH, TEMP_UPLOAD_PATH } from './data.constants';
 
-interface GetMediaOptions {
+interface LoadMediaOptions {
     page: number;
     limit: number;
     startDate?: number;
@@ -34,23 +37,16 @@ interface PaginatedResponse<T> {
     totalPages: number;
 }
 
-/**
- * Service for managing Instagram data processing and caching
- * Handles file uploads, media processing, and cache management
- */
 @Injectable()
-export class DataService {
-    private readonly logger = new Logger(DataService.name);
+export class DataProcessingService {
+    private readonly logger = new Logger(DataProcessingService.name);
 
     constructor(
         private readonly cacheService: CacheService,
-        private readonly mediaColorService: MediaColorService
+        private readonly configService: ConfigService
     ) {}
 
-    /**
-     * Handles the upload and processing of an Instagram data archive
-     * @param archive - The uploaded archive file
-     */
+    // Methods from data.service.ts
     public async upload(archive: IReadableFile) {
         await this.unzipArchive(archive);
 
@@ -63,18 +59,34 @@ export class DataService {
 
         this.logger.log('Overriding complete');
 
-        await this.cacheService.verifyCache(medias);
+        await this.verifyCache(medias);
     }
 
     /**
-     * Processes all media files and updates their metadata
-     * Converts images to WebP format and computes average colors
-     * @returns Array of processed media items
+     * Verifies and updates the cache for all media items
+     * @param inputMedias - Array of media items to process
      */
+    public async verifyCache(inputMedias: Media[]): Promise<void> {
+        this.logger.log('Starting cache verification...');
+
+        const threadCount = os.cpus().length;
+        await Promise.all(
+            Array.from({ length: threadCount }, (_, workerIndex) =>
+                this.processMediasToColors({
+                    medias: inputMedias,
+                    threadCount,
+                    workerIndex,
+                })
+            )
+        );
+
+        this.logger.log('Cache verification completed');
+    }
+
     public async getProcessedMedias(): Promise<Array<Media>> {
         this.logger.log('Processing medias...');
 
-        const unzippedMedias = await this.getUnzippedMedias();
+        const unzippedMedias = await this.loadUnzippedMedias();
         const processedMedias: Media[] = [];
 
         for (const { media, location, fileName, extension } of unzippedMedias) {
@@ -98,8 +110,7 @@ export class DataService {
                 continue;
             }
 
-            const { hex, rgba, hsl } =
-                await this.mediaColorService.calculateMediaColor(media.uri);
+            const { hex, rgba, hsl } = await this.calculateMediaColor(media.uri);
             media.average_color = hex;
             media.average_color_rgba = rgba;
             media.average_color_hsl = hsl;
@@ -117,21 +128,14 @@ export class DataService {
         return processedMedias;
     }
 
-    /**
-     * Retrieves media items with filtering and pagination
-     * @param options - Filtering and pagination options
-     * @returns Promise resolving to paginated media items
-     */
-    public async getMedia(
-        options: GetMediaOptions
+    public async loadMedia(
+        options: LoadMediaOptions
     ): Promise<PaginatedResponse<Media>> {
         const { page, limit, startDate, endDate, title, uri } = options;
-        const unzippedMedias = await this.getUnzippedMedias();
+        const unzippedMedias = await this.loadUnzippedMedias();
 
-        // Extract just the media items from the unzipped data
         let mediaItems = unzippedMedias.map((item) => item.media);
 
-        // Apply filters
         if (startDate) {
             mediaItems = mediaItems.filter(
                 (media) => media.creation_timestamp >= startDate
@@ -155,13 +159,11 @@ export class DataService {
             );
         }
 
-        // Calculate pagination
         const total = mediaItems.length;
         const totalPages = Math.ceil(total / limit);
         const startIndex = (page - 1) * limit;
         const endIndex = Math.min(startIndex + limit, total);
 
-        // Get the page of items
         const items = mediaItems.slice(startIndex, endIndex);
 
         return {
@@ -173,11 +175,6 @@ export class DataService {
         };
     }
 
-    /**
-     * Extracts and processes an uploaded Instagram data archive
-     * @param file - The uploaded file information
-     * @throws Error if the file is not a ZIP archive
-     */
     private async unzipArchive({ originalname, buffer }: IReadableFile) {
         if (!originalname.endsWith('.zip')) {
             throw new Error('Zip file is required.');
@@ -200,11 +197,7 @@ export class DataService {
         this.logger.log(`Deleting of '${originalname}' finished`);
     }
 
-    /**
-     * Retrieves and processes media files from the unzipped archive
-     * @returns Array of processed media items with file information
-     */
-    private async getUnzippedMedias(): Promise<
+    private async loadUnzippedMedias(): Promise<
         Array<{
             media: Media;
             fileName: string;
@@ -256,11 +249,6 @@ export class DataService {
             );
     }
 
-    /**
-     * Creates Post objects from processed media items
-     * @param medias - Array of processed media items
-     * @returns Array of Post objects
-     */
     private createPosts(medias: Media[]): Array<Post> {
         return medias.map((media) => ({
             media: [media],
@@ -294,4 +282,87 @@ export class DataService {
             return null;
         }
     }
-}
+
+    // Methods from media-color.service.ts
+    public async calculateMediaColor(
+        imagePath: string
+    ): Promise<{ hex: HexColor; rgba: RGBAColor; hsl: HSLColor }> {
+        try {
+            const color = await getAverageColor(imagePath);
+
+            return {
+                hex: color.hex,
+                rgba: color.value,
+                hsl: rgbToHsl(...color.value),
+            };
+        } catch (error) {
+            this.logger.error(
+                `Error processing color for image ${imagePath}: ${error.message}`
+            );
+            throw error;
+        }
+    }
+
+    public async processMediasToColors(
+        options: MediaColorProcessorData
+    ): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const worker = this.createWorker({
+                ...options,
+                medias: sortBy(options.medias, (media) => {
+                    const [h, s, l] = media.average_color_hsl;
+
+                    return [h, l, s].map((c) => Math.floor(c * 256)).join('');
+                }),
+            });
+
+            worker.on('message', (message: string) => {
+                this.logger.log(message);
+            });
+
+            worker.on('error', (error: Error) => {
+                this.logger.error(`Worker error: ${error.message}`);
+                reject(error);
+            });
+
+            worker.on('exit', (code: number) => {
+                if (code !== 0) {
+                    reject(new Error(`Worker stopped with exit code ${code}`));
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    private createWorker(options: MediaColorProcessorData) {
+        const workerPath =
+            process.env.NODE_ENV === 'development'
+                ? join(
+                      process.cwd(),
+                      'src/modules/features/data-processing/color-processor/color-processor.ts'
+                  )
+                : join(
+                      process.cwd(),
+                      'dist/src/modules/features/data-processing/color-processor/color-processor.js'
+                  );
+
+        const worker = new Worker(workerPath, {
+            workerData: {
+                ...options,
+                redisConfig: {
+                    host: this.configService.redisHost,
+                    port: this.configService.redisPort,
+                },
+            },
+            env: {
+                NODE_ENV: process.env.NODE_ENV || 'development',
+            },
+            execArgv:
+                process.env.NODE_ENV === 'development'
+                    ? ['-r', 'ts-node/register']
+                    : undefined,
+        });
+        return worker;
+    }
+} 

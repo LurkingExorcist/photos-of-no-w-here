@@ -1,5 +1,4 @@
-import type { HSLColor, HexColor, RGBAColor } from './media-color.types';
-import type { Media } from '../data/data.types';
+import type { HSLColor, HexColor, Media, RGBAColor } from '@/modules/features/data-processing/data-processing.types';
 
 /**
  * Calculates the lightness component of an HSL color

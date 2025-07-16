@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import type { Post } from '@/domain/data/data.types';
+import type { Post } from '@/modules/features/data-processing/data-processing.types';
 
 export const getDummyPosts = (): Post[] => {
     return [

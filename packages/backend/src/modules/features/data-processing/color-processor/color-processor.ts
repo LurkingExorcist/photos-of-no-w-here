@@ -2,7 +2,7 @@ import { parentPort, workerData } from 'worker_threads';
 
 import { Redis } from 'ioredis';
 
-import { prefixColor } from '../cache/prefixer.utils';
+import { prefixColor } from '@/modules/shared/cache/prefixer.utils';
 
 import {
     calculateWorkerSpectrum,
@@ -15,19 +15,8 @@ import type {
     MediaColorProcessorData,
     RedisConfig,
 } from './color-processor.types';
-import type { Media } from '../data/data.types';
+import type { Media } from '@/modules/features/data-processing/data-processing.types';
 
-if (!parentPort) {
-    throw new Error('parentPort is null');
-}
-
-const { medias, threadCount, workerIndex, redisConfig } =
-    workerData as MediaColorProcessorData & { redisConfig: RedisConfig };
-
-const redis = new Redis({
-    host: redisConfig.host,
-    port: redisConfig.port,
-});
 
 // Safe wrapper for parentPort.postMessage that checks for null
 const postMessage = (message: string): void => {
@@ -43,14 +32,14 @@ async function processColorSpectrum(params: {
     threadCount: number;
     workerIndex: number;
     medias: Media[];
-    redis: {
+    cacheService: {
         get: (key: string) => Promise<string | null>;
         set: (key: string, value: string) => Promise<void>;
     };
     prefixColor: (color: string) => string;
     logMessage: (message: string) => void;
 }): Promise<void> {
-    const { threadCount, workerIndex, medias, redis, prefixColor, logMessage } =
+    const { threadCount, workerIndex, medias, cacheService, prefixColor, logMessage } =
         params;
     const [spectrumStart, spectrumEnd] = calculateWorkerSpectrum(
         threadCount,
@@ -67,7 +56,7 @@ async function processColorSpectrum(params: {
                 const colorHex = rgbToHex(red, green, blue);
                 const cacheKey = prefixColor(colorHex);
 
-                if (await redis.get(cacheKey)) {
+                if (await cacheService.get(cacheKey)) {
                     logMessage(
                         `Worker #${workerIndex}: color #${colorHex} is already cached`
                     );
@@ -88,7 +77,7 @@ async function processColorSpectrum(params: {
                     return;
                 }
 
-                await redis.set(cacheKey, closestMedia.uri);
+                await cacheService.set(cacheKey, closestMedia.uri);
             }
         }
     }
@@ -100,12 +89,24 @@ async function processColorSpectrum(params: {
 
 // Main execution
 (async () => {
+    const { medias, threadCount, workerIndex, redisConfig } =
+        workerData as MediaColorProcessorData & { redisConfig: RedisConfig };
+
+    const redis = new Redis({
+        host: redisConfig.host,
+        port: redisConfig.port,
+    });
+    
     try {
+        if (!parentPort) {
+            throw new Error('parentPort is null');
+        }
+
         await processColorSpectrum({
             threadCount,
             workerIndex,
             medias,
-            redis: {
+            cacheService: {
                 get: redis.get.bind(redis),
                 set: async (key, value) => {
                     await redis.set(key, value);

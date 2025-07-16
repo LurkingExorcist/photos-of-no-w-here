@@ -1,4 +1,4 @@
-import type { CacheType } from '@/domain/cache/cache.types';
+import type { CacheType } from '@/modules/shared/cache/cache.types';
 
 /**
  * Adds a type prefix to a cache key

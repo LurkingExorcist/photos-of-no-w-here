@@ -7,13 +7,13 @@ import {
     rgbToHsl,
 } from './color-processor.utils';
 
-import type { Media } from '../data/data.types';
+import type { Media } from '@/modules/features/data-processing/data-processing.types';
 
 describe('Color Processor Utils', () => {
     let dummyPosts: Media[];
 
     beforeEach(async () => {
-        dummyPosts = await import('../../../mock/data/dummyPosts')
+        dummyPosts = await import('../../../../__mock__/data/dummyPosts')
             .then((module) => module.getDummyPosts())
             .then((posts) => posts.map((post) => post.media[0]));
     });

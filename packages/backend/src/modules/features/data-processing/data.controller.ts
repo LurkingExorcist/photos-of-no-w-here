@@ -16,8 +16,8 @@ import {
     ApiTags,
 } from '@nestjs/swagger';
 
-import { DataService } from './data.service';
-import { Media, PaginatedResponse } from './data.types';
+import { DataProcessingService } from '@/modules/features/data-processing/data-processing.service';
+import { Media, PaginatedResponse } from '@/modules/features/data-processing/data-processing.types';
 
 /**
  * Controller responsible for managing data operations including file uploads and cache management
@@ -26,7 +26,7 @@ import { Media, PaginatedResponse } from './data.types';
 @ApiTags('Data Management')
 @Controller('data')
 export class DataController {
-    constructor(private readonly dataService: DataService) {}
+    constructor(private readonly dataService: DataProcessingService) {}
 
     /**
      * Handles the upload of Instagram data archives
@@ -118,7 +118,7 @@ export class DataController {
             },
         },
     })
-    public async getMedia(
+    public async loadMedia(
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
         @Query('startDate') startDate?: number,
@@ -126,7 +126,7 @@ export class DataController {
         @Query('title') title?: string,
         @Query('uri') uri?: string
     ): Promise<PaginatedResponse<Media>> {
-        return this.dataService.getMedia({
+        return this.dataService.loadMedia({
             page,
             limit,
             startDate,

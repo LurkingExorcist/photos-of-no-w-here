@@ -1,11 +1,10 @@
 import { Logger, Module } from '@nestjs/common';
 
-import { ConfigModule } from '@/domain/config/config.module';
+import { ConfigModule } from '@/modules/shared/config/config.module';
 
-import { CacheModule } from './domain/cache/cache.module';
-import { DataModule } from './domain/data/data.module';
-import { MediaColorModule } from './domain/media-color/media-color.module';
-import { PhotoModule } from './domain/photo/photo.module';
+import { CacheModule } from '@/modules/shared/cache/cache.module';
+import { DataProcessingModule } from '@/modules/features/data-processing/data-processing.module';
+import { PhotoModule } from '@/modules/features/photo/photo.module';
 
 /**
  * Root module of the application that configures all dependencies and controllers
@@ -14,8 +13,7 @@ import { PhotoModule } from './domain/photo/photo.module';
 @Module({
     imports: [
         ConfigModule,
-        DataModule,
-        MediaColorModule,
+        DataProcessingModule,
         PhotoModule,
         CacheModule,
     ],

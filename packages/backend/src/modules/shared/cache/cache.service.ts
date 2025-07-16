@@ -2,11 +2,10 @@ import os from 'os';
 
 import { Injectable, Logger } from '@nestjs/common';
 
-import { CacheType, CacheTypeAll } from '@/domain/cache/cache.types';
-import { RedisService } from '@/domain/cache/redis.service';
+import { CacheType, CacheTypeAll } from '@/modules/shared/cache/cache.types';
+import { RedisService } from '@/modules/shared/cache/redis.service';
 
-import { Media } from '../data/data.types';
-import { MediaColorService } from '../media-color/media-color.service';
+import { Media } from '@/modules/features/data-processing/data-processing.types';
 
 import { PrefixerService } from './prefixer.service';
 
@@ -17,7 +16,6 @@ export class CacheService {
     constructor(
         private readonly redis: RedisService,
         private readonly prefixer: PrefixerService,
-        private readonly mediaColorService: MediaColorService
     ) {}
 
     /**
@@ -42,27 +40,6 @@ export class CacheService {
         value: string
     ): Promise<void> {
         await this.redis.set(this.prefixer.prefix(type, key), value);
-    }
-
-    /**
-     * Verifies and updates the cache for all media items
-     * @param inputMedias - Array of media items to process
-     */
-    public async verifyCache(inputMedias: Media[]): Promise<void> {
-        this.logger.log('Starting cache verification...');
-
-        const threadCount = os.cpus().length;
-        await Promise.all(
-            Array.from({ length: threadCount }, (_, workerIndex) =>
-                this.mediaColorService.processMediasToColors({
-                    medias: inputMedias,
-                    threadCount,
-                    workerIndex,
-                })
-            )
-        );
-
-        this.logger.log('Cache verification completed');
     }
 
     /**

@@ -2,7 +2,7 @@ import { Controller, Get, NotFoundException, Param, Res } from '@nestjs/common';
 import { ApiOperation, ApiParam } from '@nestjs/swagger';
 import { Response } from 'express';
 
-import { CacheService } from '../cache/cache.service';
+import { PhotoService } from './photo.service';
 
 /**
  * Controller responsible for handling photo-related operations
@@ -10,7 +10,7 @@ import { CacheService } from '../cache/cache.service';
  */
 @Controller('photo')
 export class PhotoController {
-    constructor(private readonly cacheService: CacheService) {}
+    constructor(private readonly photoService: PhotoService) {}
 
     /**
      * Retrieves a photo by its color hex value
@@ -26,7 +26,7 @@ export class PhotoController {
         @Res() response: Response,
         @Param('color') colorHex: string
     ) {
-        const photoPath = await this.cacheService.get('color', colorHex);
+        const photoPath = await this.photoService.getPhotoPath(colorHex);
 
         if (!photoPath) {
             throw new NotFoundException('Photo not found');

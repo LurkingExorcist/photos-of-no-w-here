@@ -1,10 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
-import { CacheType, CacheTypeAll } from '@/domain/cache/cache.types';
-
-import { DataService } from '../data/data.service';
-import { Media } from '../data/data.types';
+import { CacheType, CacheTypeAll } from '@/modules/shared/cache/cache.types';
 
 import { CacheService } from './cache.service';
 
@@ -14,10 +11,7 @@ import { CacheService } from './cache.service';
 @ApiTags('Cache Management')
 @Controller('cache')
 export class CacheController {
-    constructor(
-        private readonly cacheService: CacheService,
-        private readonly dataService: DataService
-    ) {}
+    constructor(private readonly cacheService: CacheService) {}
 
     /**
      * Get the current cache statistics
@@ -27,21 +21,6 @@ export class CacheController {
     @Get('stats')
     public async getCacheStats() {
         return this.cacheService.getCacheStats();
-    }
-
-    /**
-     * Verify and update the cache for the given media items
-     * @param medias - Array of media items to verify and update
-     * @returns Promise resolving to the verification result
-     */
-    @ApiOperation({
-        summary: 'Verify and update the cache for the given media items',
-    })
-    @Post('verify')
-    public async verifyCache() {
-        return this.dataService
-            .getProcessedMedias()
-            .then((medias) => this.cacheService.verifyCache(medias));
     }
 
     /**
